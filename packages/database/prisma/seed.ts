@@ -132,6 +132,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
 async function main() {
   await seedPermissionsAndRoles();
   await bootstrapGlobalAdmin();
+  await seedTestAccount();
 }
 
 async function seedPermissionsAndRoles() {
@@ -205,6 +206,74 @@ async function bootstrapGlobalAdmin() {
     create: {
       name: adminName,
       email: normalizedEmail,
+      passwordHash: await argon2.hash(adminPassword),
+      emailVerifiedAt: new Date(),
+    },
+  });
+
+  await prisma.membership.upsert({
+    where: {
+      companyId_userId: {
+        companyId: company.id,
+        userId: user.id,
+      },
+    },
+    update: {
+      roleId: role.id,
+      status: "ACTIVE",
+    },
+    create: {
+      companyId: company.id,
+      userId: user.id,
+      roleId: role.id,
+      status: "ACTIVE",
+    },
+  });
+}
+
+async function seedTestAccount() {
+  if (process.env.ENABLE_TEST_ACCOUNT !== "true") {
+    return;
+  }
+
+  const companyName = process.env.TEST_ACCOUNT_COMPANY_NAME ?? "FleetControl Test Company";
+  const adminName = process.env.TEST_ACCOUNT_ADMIN_NAME ?? "Conta Teste FleetControl";
+  const adminEmail = (
+    process.env.TEST_ACCOUNT_ADMIN_EMAIL ?? "teste@fleetcontrol.local"
+  ).toLowerCase();
+  const adminPassword = process.env.TEST_ACCOUNT_ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    throw new Error("TEST_ACCOUNT_ADMIN_PASSWORD is required when ENABLE_TEST_ACCOUNT=true.");
+  }
+
+  if (adminPassword.length < 12) {
+    throw new Error("TEST_ACCOUNT_ADMIN_PASSWORD must have at least 12 characters.");
+  }
+
+  const company = await prisma.company.upsert({
+    where: { document: `test:${adminEmail}` },
+    update: { name: companyName, status: "ACTIVE" },
+    create: {
+      name: companyName,
+      legalName: companyName,
+      document: `test:${adminEmail}`,
+      status: "ACTIVE",
+    },
+  });
+  const role = await prisma.role.findUniqueOrThrow({
+    where: { scopeId_key: { scopeId: "system", key: "globalAdmin" } },
+  });
+  const user = await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      name: adminName,
+      passwordHash: await argon2.hash(adminPassword),
+      emailVerifiedAt: new Date(),
+    },
+    create: {
+      name: adminName,
+      email: adminEmail,
       passwordHash: await argon2.hash(adminPassword),
       emailVerifiedAt: new Date(),
     },
