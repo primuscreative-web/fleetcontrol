@@ -26,7 +26,6 @@ import type {
   TransferStockDto,
 } from "../presentation/supply-chain.dto";
 import { SUPPLY_CHAIN_REPOSITORY, type SupplyChainRepository } from "./supply-chain.repository";
-const n = (v: unknown) => (v == null ? null : Number(v));
 @Injectable()
 export class SupplyChainService {
   constructor(
