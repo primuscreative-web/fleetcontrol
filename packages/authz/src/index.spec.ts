@@ -54,4 +54,11 @@ describe("authz", () => {
     expect(hasPermission("purchasing", permissions.tires.retread)).toBe(true);
     expect(hasPermission("finance", permissions.tires.manage)).toBe(false);
   });
+  it("separates workshop homologation, catalog, quotes and evaluation", () => {
+    expect(hasPermission("purchasing", permissions.workshops.approve)).toBe(true);
+    expect(hasPermission("operator", permissions.workshops.quotes)).toBe(true);
+    expect(hasPermission("operator", permissions.workshops.approve)).toBe(false);
+    expect(hasPermission("finance", permissions.workshops.evaluate)).toBe(true);
+    expect(hasPermission("viewer", permissions.workshops.read)).toBe(false);
+  });
 });

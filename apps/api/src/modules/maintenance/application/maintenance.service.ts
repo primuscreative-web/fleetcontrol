@@ -472,6 +472,12 @@ export class MaintenanceService {
           metadata: { orderId: id, actualCost: String(actualCost) },
         },
       });
+      if (order.workshopId) {
+        await tx.workshop.update({
+          where: { id: order.workshopId, companyId: principal.companyId },
+          data: { totalBilled: { increment: actualCost } },
+        });
+      }
       if (order.planId) {
         const plan = await tx.maintenancePlan.findFirst({
           where: { id: order.planId, companyId: principal.companyId },

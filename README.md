@@ -108,6 +108,8 @@ Implemented in this phase:
   vehicle lifecycle integration, and due-soon dashboard.
 - Serialized tire assets, vehicle positions, inspections, rotations, retreads, safety alerts,
   lifecycle mileage, and cost-per-kilometer analytics.
+- Workshop homologation, service catalogs, competitive maintenance quotes, controlled selection,
+  SLA and warranty terms, billing history, and performance evaluation.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.
@@ -118,7 +120,6 @@ Implemented in this phase:
 Still deferred:
 
 - Finance.
-- Workshops.
 - Auto parts.
 - Checklists.
 - Reports.

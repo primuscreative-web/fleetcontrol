@@ -32,6 +32,7 @@ import { StorageModule } from "./modules/storage/storage.module";
 import { TenancyModule } from "./modules/tenancy/tenancy.module";
 import { TiresModule } from "./modules/tires/tires.module";
 import { UsersModule } from "./modules/users/users.module";
+import { WorkshopsModule } from "./modules/workshops/workshops.module";
 import { PrismaModule } from "./shared/infrastructure/prisma.module";
 
 @Module({
@@ -68,6 +69,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     FuelModule,
     MaintenanceModule,
     TiresModule,
+    WorkshopsModule,
     MailModule,
     NotificationsModule,
     HealthModule,
