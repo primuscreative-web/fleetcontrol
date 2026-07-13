@@ -24,4 +24,12 @@ describe("authz", () => {
     expect(hasPermission("driver", permissions.drivers.read)).toBe(false);
     expect(hasPermission("viewer", permissions.drivers.read)).toBe(false);
   });
+
+  it("separates contract operations from archival and financial visibility", () => {
+    expect(hasPermission("manager", permissions.contracts.allocate)).toBe(true);
+    expect(hasPermission("purchasing", permissions.contracts.amend)).toBe(true);
+    expect(hasPermission("finance", permissions.contracts.read)).toBe(true);
+    expect(hasPermission("operator", permissions.contracts.archive)).toBe(false);
+    expect(hasPermission("viewer", permissions.contracts.read)).toBe(false);
+  });
 });

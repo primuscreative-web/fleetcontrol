@@ -12,6 +12,7 @@ import {
   UserCircle,
   Users,
   ContactRound,
+  ScrollText,
 } from "lucide-react";
 
 export const navigationItems: Array<{
@@ -32,6 +33,12 @@ export const navigationItems: Array<{
     href: "/dashboard/motoristas",
     icon: ContactRound,
     permission: permissions.drivers.read,
+  },
+  {
+    label: "Contratos",
+    href: "/dashboard/contratos",
+    icon: ScrollText,
+    permission: permissions.contracts.read,
   },
   {
     label: "Empresa",

@@ -13,6 +13,7 @@ const vehicleInclude = {
   make: true,
   model: true,
   version: true,
+  contract: { select: { id: true, number: true, title: true, status: true } },
   photos: {
     where: { isPrimary: true },
     take: 1,

@@ -409,7 +409,14 @@ function Summary({ vehicle }: { vehicle: VehicleRecord }) {
         <CardContent className="grid gap-3 text-sm md:grid-cols-3">
           <Info label="Valor estimado" value={formatCurrency(vehicle.estimatedValue)} />
           <Info label="Hodometro" value={vehicle.currentOdometer} />
-          <Info label="Contrato" value={vehicle.contractId} />
+          <Info
+            label="Contrato"
+            value={
+              vehicle.contract
+                ? `${vehicle.contract.number} - ${vehicle.contract.title}`
+                : vehicle.contractId
+            }
+          />
         </CardContent>
       </Card>
     </section>

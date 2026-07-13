@@ -24,6 +24,7 @@ export interface FleetOptions {
   makes: FleetNamedEntity[];
   models: FleetNamedEntity[];
   versions: FleetNamedEntity[];
+  contracts: Array<{ id: string; number: string; title: string }>;
 }
 
 export interface FleetDashboard {
@@ -78,6 +79,7 @@ export interface VehicleRecord {
   make?: FleetNamedEntity | null;
   model?: FleetNamedEntity | null;
   version?: FleetNamedEntity | null;
+  contract?: { id: string; number: string; title: string; status: string } | null;
   photos?: VehiclePhoto[];
   documents?: VehicleDocument[];
   timeline?: VehicleTimelineEvent[];

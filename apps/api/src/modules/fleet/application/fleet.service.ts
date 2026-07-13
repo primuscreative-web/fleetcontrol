@@ -141,20 +141,34 @@ export class FleetService {
 
   async getOptions(principal: RequestPrincipal) {
     const companyId = principal.companyId;
-    const [branches, departments, costCenters, categories, subcategories, makes, models, versions] =
-      await this.prisma.$transaction([
-        this.prisma.branch.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.department.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.costCenter.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.vehicleCategory.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.vehicleSubcategory.findMany({
-          where: { companyId },
-          orderBy: { name: "asc" },
-        }),
-        this.prisma.vehicleMake.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.vehicleModel.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-        this.prisma.vehicleVersion.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
-      ]);
+    const [
+      branches,
+      departments,
+      costCenters,
+      categories,
+      subcategories,
+      makes,
+      models,
+      versions,
+      contracts,
+    ] = await this.prisma.$transaction([
+      this.prisma.branch.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.department.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.costCenter.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.vehicleCategory.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.vehicleSubcategory.findMany({
+        where: { companyId },
+        orderBy: { name: "asc" },
+      }),
+      this.prisma.vehicleMake.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.vehicleModel.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.vehicleVersion.findMany({ where: { companyId }, orderBy: { name: "asc" } }),
+      this.prisma.contract.findMany({
+        where: { companyId, status: "ACTIVE", archivedAt: null },
+        select: { id: true, number: true, title: true },
+        orderBy: { number: "asc" },
+      }),
+    ]);
 
     return {
       statuses: this.toOptions(vehicleStatuses),
@@ -169,6 +183,7 @@ export class FleetService {
       makes,
       models,
       versions,
+      contracts,
     };
   }
 
@@ -788,6 +803,11 @@ export class FleetService {
       this.ensureReference("version", dto.versionId, () =>
         this.prisma.vehicleVersion.count({ where: { id: dto.versionId, companyId } }),
       ),
+      this.ensureReference("contract", dto.contractId, () =>
+        this.prisma.contract.count({
+          where: { id: dto.contractId, companyId, archivedAt: null },
+        }),
+      ),
     ]);
   }
 
@@ -815,6 +835,7 @@ export class FleetService {
       make: dto.makeId ? { connect: { id: dto.makeId } } : undefined,
       model: dto.modelId ? { connect: { id: dto.modelId } } : undefined,
       version: dto.versionId ? { connect: { id: dto.versionId } } : undefined,
+      contract: dto.contractId ? { connect: { id: dto.contractId } } : undefined,
       plate: dto.plate.toUpperCase().trim(),
       renavam: dto.renavam,
       chassis: dto.chassis,
@@ -833,7 +854,6 @@ export class FleetService {
       status: dto.status ?? "AVAILABLE",
       estimatedValue: dto.estimatedValue,
       currentOdometer: dto.currentOdometer,
-      contractId: dto.contractId,
       observations: dto.observations,
     };
   }
@@ -975,6 +995,7 @@ type VehicleRecord = Prisma.VehicleGetPayload<{
     make: true;
     model: true;
     version: true;
+    contract: true;
     photos: true;
     documents: true;
     timeline: true;

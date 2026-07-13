@@ -236,9 +236,15 @@ export function VehicleForm({ vehicleId }: { vehicleId?: string }) {
               onChange={(value) => form.setValue("costCenterId", value)}
               items={options.data?.costCenters ?? []}
             />
-            <Field label="Contrato">
-              <Input {...form.register("contractId")} />
-            </Field>
+            <SelectField
+              label="Contrato"
+              value={form.watch("contractId") ?? ""}
+              onChange={(value) => form.setValue("contractId", value)}
+              items={(options.data?.contracts ?? []).map((item) => ({
+                id: item.id,
+                name: `${item.number} - ${item.title}`,
+              }))}
+            />
             <Field label="Valor estimado">
               <Input type="number" step="0.01" {...form.register("estimatedValue")} />
             </Field>
