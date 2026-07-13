@@ -327,6 +327,43 @@ enum WorkshopQuoteStatus {
   CANCELLED
 }
 
+enum SupplierStatus {
+  PENDING_APPROVAL
+  APPROVED
+  SUSPENDED
+  REJECTED
+  INACTIVE
+}
+
+enum SupplierCategory {
+  AUTO_PARTS
+  TIRES
+  FUEL
+  SERVICES
+  EQUIPMENT
+  GENERAL
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  AWAITING_APPROVAL
+  APPROVED
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  REJECTED
+  CANCELLED
+}
+
+enum StockMovementType {
+  RECEIPT
+  ISSUE
+  RETURN
+  TRANSFER
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
 model Company {
   id                   String                      @id @default(cuid())
   name                 String
@@ -387,6 +424,15 @@ model Company {
   workshopQuotes       WorkshopQuote[]
   workshopQuoteItems   WorkshopQuoteItem[]
   workshopEvaluations  WorkshopEvaluation[]
+  suppliers            Supplier[]
+  parts                Part[]
+  partSuppliers        PartSupplier[]
+  warehouses           Warehouse[]
+  stockLevels          StockLevel[]
+  stockMovements       StockMovement[]
+  purchaseOrders       PurchaseOrder[]
+  purchaseOrderItems   PurchaseOrderItem[]
+  supplierEvaluations  SupplierEvaluation[]
 
   @@index([status])
 }
@@ -410,6 +456,8 @@ model Branch {
   maintenanceOrders MaintenanceOrder[]
   tires             Tire[]
   workshops         Workshop[]
+  warehouses        Warehouse[]
+  purchaseOrders    PurchaseOrder[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -503,6 +551,12 @@ model User {
   workshopsApproved          Workshop[]                  @relation("WorkshopApprovedBy")
   workshopQuotesCreated      WorkshopQuote[]             @relation("WorkshopQuoteCreatedBy")
   workshopEvaluationsCreated WorkshopEvaluation[]        @relation("WorkshopEvaluationCreatedBy")
+  suppliersApproved          Supplier[]                  @relation("SupplierApprovedBy")
+  warehousesResponsible      Warehouse[]                 @relation("WarehouseResponsible")
+  purchaseOrdersCreated      PurchaseOrder[]             @relation("PurchaseOrderCreatedBy")
+  purchaseOrdersApproved     PurchaseOrder[]             @relation("PurchaseOrderApprovedBy")
+  stockMovementsCreated      StockMovement[]             @relation("StockMovementCreatedBy")
+  supplierEvaluationsCreated SupplierEvaluation[]        @relation("SupplierEvaluationCreatedBy")
 }
 
 model Membership {
@@ -1397,6 +1451,7 @@ model MaintenanceOrder {
   items                 MaintenanceOrderItem[]
   workshopQuotes        WorkshopQuote[]
   workshopEvaluation    WorkshopEvaluation?
+  stockMovements        StockMovement[]
 
   @@unique([companyId, code])
   @@index([companyId, status, priority])
@@ -1716,4 +1771,266 @@ model WorkshopEvaluation {
 
   @@index([companyId, createdAt])
   @@index([workshopId, createdAt])
+}
+
+model Supplier {
+  id               String               @id @default(cuid())
+  companyId        String
+  approvedById     String?
+  code             String?
+  legalName        String
+  tradeName        String
+  document         String
+  category         SupplierCategory     @default(AUTO_PARTS)
+  status           SupplierStatus       @default(PENDING_APPROVAL)
+  contactName      String?
+  email            String?
+  phone            String?
+  address          String?
+  city             String?
+  state            String?
+  paymentTermsDays Int?
+  leadTimeDays     Int?
+  approvedAt       DateTime?
+  suspensionReason String?
+  rating           Decimal              @default(0) @db.Decimal(4, 2)
+  evaluationCount  Int                  @default(0)
+  totalPurchased   Decimal              @default(0) @db.Decimal(16, 2)
+  notes            String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  archivedAt       DateTime?
+  company          Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  approvedBy       User?                @relation("SupplierApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  parts            PartSupplier[]
+  purchaseOrders   PurchaseOrder[]
+  evaluations      SupplierEvaluation[]
+
+  @@unique([companyId, document])
+  @@unique([companyId, code])
+  @@index([companyId, status, category])
+  @@index([companyId, rating])
+  @@index([archivedAt])
+}
+
+model Part {
+  id                 String              @id @default(cuid())
+  companyId          String
+  sku                String
+  name               String
+  description        String?
+  category           String?
+  manufacturer       String?
+  manufacturerCode   String?
+  barcode            String?
+  unit               String              @default("UN")
+  minimumStock       Decimal             @default(0) @db.Decimal(14, 3)
+  maximumStock       Decimal?            @db.Decimal(14, 3)
+  reorderPoint       Decimal             @default(0) @db.Decimal(14, 3)
+  compatibleVehicles Json?
+  active             Boolean             @default(true)
+  notes              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  archivedAt         DateTime?
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  suppliers          PartSupplier[]
+  stockLevels        StockLevel[]
+  movements          StockMovement[]
+  purchaseItems      PurchaseOrderItem[]
+
+  @@unique([companyId, sku])
+  @@unique([companyId, barcode])
+  @@index([companyId, active, category])
+  @@index([companyId, reorderPoint])
+  @@index([archivedAt])
+}
+
+model PartSupplier {
+  id                 String    @id @default(cuid())
+  companyId          String
+  partId             String
+  supplierId         String
+  supplierPartNumber String?
+  lastPrice          Decimal?  @db.Decimal(14, 4)
+  leadTimeDays       Int?
+  minimumOrderQty    Decimal?  @db.Decimal(14, 3)
+  preferred          Boolean   @default(false)
+  lastQuotedAt       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  company            Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part               Part      @relation(fields: [partId], references: [id], onDelete: Cascade)
+  supplier           Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@unique([partId, supplierId])
+  @@index([companyId, preferred])
+  @@index([supplierId])
+}
+
+model Warehouse {
+  id                String          @id @default(cuid())
+  companyId         String
+  branchId          String?
+  responsibleUserId String?
+  code              String
+  name              String
+  address           String?
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  archivedAt        DateTime?
+  company           Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch            Branch?         @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  responsibleUser   User?           @relation("WarehouseResponsible", fields: [responsibleUserId], references: [id], onDelete: SetNull)
+  stockLevels       StockLevel[]
+  movementsFrom     StockMovement[] @relation("StockMovementFromWarehouse")
+  movementsTo       StockMovement[] @relation("StockMovementToWarehouse")
+  purchaseOrders    PurchaseOrder[]
+
+  @@unique([companyId, code])
+  @@unique([companyId, name])
+  @@index([companyId, branchId, active])
+  @@index([archivedAt])
+}
+
+model StockLevel {
+  id               String    @id @default(cuid())
+  companyId        String
+  warehouseId      String
+  partId           String
+  quantityOnHand   Decimal   @default(0) @db.Decimal(14, 3)
+  quantityReserved Decimal   @default(0) @db.Decimal(14, 3)
+  averageUnitCost  Decimal   @default(0) @db.Decimal(14, 4)
+  location         String?
+  lastMovementAt   DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouse        Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  part             Part      @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@unique([warehouseId, partId])
+  @@index([companyId, quantityOnHand])
+  @@index([partId])
+}
+
+model PurchaseOrder {
+  id              String              @id @default(cuid())
+  companyId       String
+  branchId        String?
+  supplierId      String
+  warehouseId     String
+  createdById     String?
+  approvedById    String?
+  number          String
+  status          PurchaseOrderStatus @default(DRAFT)
+  orderedAt       DateTime?
+  expectedAt      DateTime?
+  receivedAt      DateTime?
+  subtotal        Decimal             @default(0) @db.Decimal(16, 2)
+  discountAmount  Decimal             @default(0) @db.Decimal(16, 2)
+  freightAmount   Decimal             @default(0) @db.Decimal(16, 2)
+  taxAmount       Decimal             @default(0) @db.Decimal(16, 2)
+  totalAmount     Decimal             @default(0) @db.Decimal(16, 2)
+  invoiceNumber   String?
+  approvalNotes   String?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  company         Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  supplier        Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  warehouse       Warehouse           @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  createdBy       User?               @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy      User?               @relation("PurchaseOrderApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  items           PurchaseOrderItem[]
+  movements       StockMovement[]
+  evaluation      SupplierEvaluation?
+
+  @@unique([companyId, number])
+  @@index([companyId, status, expectedAt])
+  @@index([companyId, branchId])
+  @@index([supplierId, createdAt])
+  @@index([warehouseId])
+}
+
+model PurchaseOrderItem {
+  id               String          @id @default(cuid())
+  companyId        String
+  purchaseOrderId  String
+  partId           String
+  quantityOrdered  Decimal         @db.Decimal(14, 3)
+  quantityReceived Decimal         @default(0) @db.Decimal(14, 3)
+  unitPrice        Decimal         @db.Decimal(14, 4)
+  totalPrice       Decimal         @db.Decimal(16, 2)
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  company          Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchaseOrder    PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  part             Part            @relation(fields: [partId], references: [id], onDelete: Restrict)
+  movements        StockMovement[]
+
+  @@unique([purchaseOrderId, partId])
+  @@index([companyId, partId])
+}
+
+model StockMovement {
+  id                  String             @id @default(cuid())
+  companyId           String
+  partId              String
+  fromWarehouseId     String?
+  toWarehouseId       String?
+  purchaseOrderId     String?
+  purchaseOrderItemId String?
+  maintenanceOrderId  String?
+  createdById         String?
+  type                StockMovementType
+  quantity            Decimal            @db.Decimal(14, 3)
+  unitCost            Decimal            @default(0) @db.Decimal(14, 4)
+  totalCost           Decimal            @default(0) @db.Decimal(16, 2)
+  reference           String?
+  reason              String?
+  occurredAt          DateTime           @default(now())
+  metadata            Json?
+  createdAt           DateTime           @default(now())
+  company             Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  part                Part               @relation(fields: [partId], references: [id], onDelete: Restrict)
+  fromWarehouse       Warehouse?         @relation("StockMovementFromWarehouse", fields: [fromWarehouseId], references: [id], onDelete: SetNull)
+  toWarehouse         Warehouse?         @relation("StockMovementToWarehouse", fields: [toWarehouseId], references: [id], onDelete: SetNull)
+  purchaseOrder       PurchaseOrder?     @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
+  purchaseOrderItem   PurchaseOrderItem? @relation(fields: [purchaseOrderItemId], references: [id], onDelete: SetNull)
+  maintenanceOrder    MaintenanceOrder?  @relation(fields: [maintenanceOrderId], references: [id], onDelete: SetNull)
+  createdBy           User?              @relation("StockMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, occurredAt])
+  @@index([partId, occurredAt])
+  @@index([fromWarehouseId])
+  @@index([toWarehouseId])
+  @@index([maintenanceOrderId])
+  @@index([purchaseOrderId])
+}
+
+model SupplierEvaluation {
+  id               String        @id @default(cuid())
+  companyId        String
+  supplierId       String
+  purchaseOrderId  String        @unique
+  createdById      String?
+  qualityScore     Int
+  deliveryScore    Int
+  serviceScore     Int
+  costBenefitScore Int
+  overallScore     Decimal       @db.Decimal(4, 2)
+  comments         String?
+  createdAt        DateTime      @default(now())
+  company          Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  supplier         Supplier      @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  createdBy        User?         @relation("SupplierEvaluationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([supplierId, createdAt])
 }

@@ -29,6 +29,7 @@ import { MaintenanceModule } from "./modules/maintenance/maintenance.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { SupplyChainModule } from "./modules/supply-chain/supply-chain.module";
 import { TenancyModule } from "./modules/tenancy/tenancy.module";
 import { TiresModule } from "./modules/tires/tires.module";
 import { UsersModule } from "./modules/users/users.module";
@@ -70,6 +71,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     MaintenanceModule,
     TiresModule,
     WorkshopsModule,
+    SupplyChainModule,
     MailModule,
     NotificationsModule,
     HealthModule,

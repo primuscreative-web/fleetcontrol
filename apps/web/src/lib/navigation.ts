@@ -17,6 +17,7 @@ import {
   Wrench,
   CircleDot,
   Hammer,
+  Package,
 } from "lucide-react";
 
 export const navigationItems: Array<{
@@ -67,6 +68,18 @@ export const navigationItems: Array<{
     href: "/dashboard/oficinas",
     icon: Hammer,
     permission: permissions.workshops.read,
+  },
+  {
+    label: "Fornecedores",
+    href: "/dashboard/fornecedores",
+    icon: Building2,
+    permission: permissions.suppliers.read,
+  },
+  {
+    label: "Estoque e compras",
+    href: "/dashboard/estoque",
+    icon: Package,
+    permission: permissions.inventory.read,
   },
   {
     label: "Empresa",

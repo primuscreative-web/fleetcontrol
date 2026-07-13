@@ -120,6 +120,6 @@ Implemented in this phase:
 Still deferred:
 
 - Finance.
-- Auto parts.
+- Auto parts, suppliers and inventory with weighted-average costing.
 - Checklists.
 - Reports.
