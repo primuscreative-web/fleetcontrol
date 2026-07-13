@@ -16,4 +16,12 @@ describe("authz", () => {
     expect(isWithinScope({ companyId: "company-a" }, { companyId: "company-a" })).toBe(true);
     expect(isWithinScope({ companyId: "company-b" }, { companyId: "company-a" })).toBe(false);
   });
+
+  it("grants driver operations without exposing archival to operational roles", () => {
+    expect(hasPermission("manager", permissions.drivers.assign)).toBe(true);
+    expect(hasPermission("supervisor", permissions.drivers.documents)).toBe(true);
+    expect(hasPermission("operator", permissions.drivers.archive)).toBe(false);
+    expect(hasPermission("driver", permissions.drivers.read)).toBe(false);
+    expect(hasPermission("viewer", permissions.drivers.read)).toBe(false);
+  });
 });

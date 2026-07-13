@@ -11,6 +11,7 @@ import {
   Truck,
   UserCircle,
   Users,
+  ContactRound,
 } from "lucide-react";
 
 export const navigationItems: Array<{
@@ -25,6 +26,12 @@ export const navigationItems: Array<{
     href: "/dashboard/frota",
     icon: Truck,
     permission: permissions.fleet.read,
+  },
+  {
+    label: "Motoristas",
+    href: "/dashboard/motoristas",
+    icon: ContactRound,
+    permission: permissions.drivers.read,
   },
   {
     label: "Empresa",

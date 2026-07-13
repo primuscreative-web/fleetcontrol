@@ -98,6 +98,8 @@ Implemented in this phase:
 - Versioned Prisma migration and idempotent bootstrap seed for the first Global Administrator.
 - Fleet vehicle lifecycle, dashboards, documents, photos, cost visibility, archived records, and
   user-owned saved filter views.
+- Driver lifecycle, CNH and occupational expiry alerts, vehicle assignment history, documents,
+  dashboards, and tenant-safe operational workflows.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.
@@ -107,7 +109,6 @@ Implemented in this phase:
 
 Still deferred:
 
-- Drivers.
 - Finance.
 - Contracts.
 - Tires.

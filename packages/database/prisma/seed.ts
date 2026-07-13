@@ -44,6 +44,11 @@ const permissions = [
   ["fleet", "documents"],
   ["fleet", "photos"],
   ["fleet", "costs"],
+  ["drivers", "read"],
+  ["drivers", "manage"],
+  ["drivers", "assign"],
+  ["drivers", "documents"],
+  ["drivers", "archive"],
 ] as const;
 
 const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
@@ -72,6 +77,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fleet:documents",
     "fleet:photos",
     "fleet:costs",
+    "drivers:read",
+    "drivers:manage",
+    "drivers:assign",
+    "drivers:documents",
+    "drivers:archive",
   ],
   director: [
     "company:read",
@@ -83,6 +93,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "audit:read",
     "fleet:read",
     "fleet:costs",
+    "drivers:read",
   ],
   manager: [
     "company:read",
@@ -97,6 +108,10 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fleet:documents",
     "fleet:photos",
     "fleet:costs",
+    "drivers:read",
+    "drivers:manage",
+    "drivers:assign",
+    "drivers:documents",
   ],
   supervisor: [
     "company:read",
@@ -108,6 +123,10 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fleet:manage",
     "fleet:documents",
     "fleet:photos",
+    "drivers:read",
+    "drivers:manage",
+    "drivers:assign",
+    "drivers:documents",
   ],
   finance: ["company:read", "notifications:read", "fleet:read", "fleet:costs"],
   purchasing: [
@@ -124,6 +143,9 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fleet:manage",
     "fleet:documents",
     "fleet:photos",
+    "drivers:read",
+    "drivers:manage",
+    "drivers:documents",
   ],
   driver: ["company:read", "notifications:read", "fleet:read"],
   viewer: ["company:read", "notifications:read", "fleet:read"],

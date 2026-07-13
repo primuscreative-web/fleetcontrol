@@ -18,6 +18,7 @@ import { AuditModule } from "./modules/audit/audit.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { RedisCacheModule } from "./modules/cache/cache.module";
 import { EventsModule } from "./modules/events/events.module";
+import { DriversModule } from "./modules/drivers/drivers.module";
 import { FeatureFlagsModule } from "./modules/feature-flags/feature-flags.module";
 import { FleetModule } from "./modules/fleet/fleet.module";
 import { HealthModule } from "./modules/health/health.module";
@@ -58,6 +59,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     SettingsModule,
     FeatureFlagsModule,
     FleetModule,
+    DriversModule,
     MailModule,
     NotificationsModule,
     HealthModule,

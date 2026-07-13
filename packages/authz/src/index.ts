@@ -47,6 +47,13 @@ export const permissions = {
     photos: "fleet:photos",
     costs: "fleet:costs",
   },
+  drivers: {
+    read: "drivers:read",
+    manage: "drivers:manage",
+    assign: "drivers:assign",
+    documents: "drivers:documents",
+    archive: "drivers:archive",
+  },
 } as const;
 
 type PermissionValue<T> = T extends Record<string, infer TValue> ? TValue : never;
@@ -80,6 +87,11 @@ export const roles = {
     permissions.fleet.documents,
     permissions.fleet.photos,
     permissions.fleet.costs,
+    permissions.drivers.read,
+    permissions.drivers.manage,
+    permissions.drivers.assign,
+    permissions.drivers.documents,
+    permissions.drivers.archive,
   ],
   companyAdmin: [
     permissions.company.read,
@@ -105,6 +117,11 @@ export const roles = {
     permissions.fleet.documents,
     permissions.fleet.photos,
     permissions.fleet.costs,
+    permissions.drivers.read,
+    permissions.drivers.manage,
+    permissions.drivers.assign,
+    permissions.drivers.documents,
+    permissions.drivers.archive,
   ],
   director: [
     permissions.company.read,
@@ -116,6 +133,7 @@ export const roles = {
     permissions.audit.read,
     permissions.fleet.read,
     permissions.fleet.costs,
+    permissions.drivers.read,
   ],
   manager: [
     permissions.company.read,
@@ -130,6 +148,10 @@ export const roles = {
     permissions.fleet.documents,
     permissions.fleet.photos,
     permissions.fleet.costs,
+    permissions.drivers.read,
+    permissions.drivers.manage,
+    permissions.drivers.assign,
+    permissions.drivers.documents,
   ],
   supervisor: [
     permissions.company.read,
@@ -141,6 +163,10 @@ export const roles = {
     permissions.fleet.manage,
     permissions.fleet.documents,
     permissions.fleet.photos,
+    permissions.drivers.read,
+    permissions.drivers.manage,
+    permissions.drivers.assign,
+    permissions.drivers.documents,
   ],
   finance: [
     permissions.company.read,
@@ -162,6 +188,9 @@ export const roles = {
     permissions.fleet.manage,
     permissions.fleet.documents,
     permissions.fleet.photos,
+    permissions.drivers.read,
+    permissions.drivers.manage,
+    permissions.drivers.documents,
   ],
   driver: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],
   viewer: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],

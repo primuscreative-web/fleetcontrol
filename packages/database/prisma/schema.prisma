@@ -135,42 +135,75 @@ enum VehicleCostType {
   OTHER
 }
 
+enum DriverStatus {
+  ACTIVE
+  ON_LEAVE
+  SUSPENDED
+  INACTIVE
+  TERMINATED
+}
+
+enum DriverDocumentType {
+  CNH
+  MEDICAL_CERTIFICATE
+  TOXICOLOGY_EXAM
+  TRAINING_CERTIFICATE
+  IDENTITY
+  ADDRESS_PROOF
+  OTHER
+}
+
+enum DriverTimelineType {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  VEHICLE_ASSIGNED
+  VEHICLE_UNASSIGNED
+  DOCUMENT_UPLOADED
+  ALERT_CREATED
+  ARCHIVED
+}
+
 model Company {
-  id                  String               @id @default(cuid())
-  name                String
-  legalName           String?
-  document            String?              @unique
-  status              CompanyStatus        @default(ACTIVE)
-  logoUrl             String?
-  defaultLanguage     String               @default("pt-BR")
-  defaultTimezone     String               @default("America/Sao_Paulo")
-  defaultCurrency     String               @default("BRL")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  branches            Branch[]
-  departments         Department[]
-  teams               Team[]
-  positions           Position[]
-  memberships         Membership[]
-  roles               Role[]
-  auditLogs           AuditLog[]
-  notifications       Notification[]
-  settings            Setting[]
-  featureFlags        FeatureFlag[]
-  outboxEvents        OutboxEvent[]
-  passwordResetTokens PasswordResetToken[]
-  costCenters         CostCenter[]
-  vehicleCategories   VehicleCategory[]
+  id                   String                    @id @default(cuid())
+  name                 String
+  legalName            String?
+  document             String?                   @unique
+  status               CompanyStatus             @default(ACTIVE)
+  logoUrl              String?
+  defaultLanguage      String                    @default("pt-BR")
+  defaultTimezone      String                    @default("America/Sao_Paulo")
+  defaultCurrency      String                    @default("BRL")
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  branches             Branch[]
+  departments          Department[]
+  teams                Team[]
+  positions            Position[]
+  memberships          Membership[]
+  roles                Role[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  settings             Setting[]
+  featureFlags         FeatureFlag[]
+  outboxEvents         OutboxEvent[]
+  passwordResetTokens  PasswordResetToken[]
+  costCenters          CostCenter[]
+  vehicleCategories    VehicleCategory[]
   vehicleSubcategories VehicleSubcategory[]
-  vehicleMakes        VehicleMake[]
-  vehicleModels       VehicleModel[]
-  vehicleVersions     VehicleVersion[]
-  vehicles            Vehicle[]
-  vehiclePhotos       VehiclePhoto[]
-  vehicleDocuments    VehicleDocument[]
-  vehicleTimeline     VehicleTimelineEvent[]
-  vehicleCosts        VehicleCostAggregate[]
-  vehicleSavedFilters VehicleSavedFilter[]
+  vehicleMakes         VehicleMake[]
+  vehicleModels        VehicleModel[]
+  vehicleVersions      VehicleVersion[]
+  vehicles             Vehicle[]
+  vehiclePhotos        VehiclePhoto[]
+  vehicleDocuments     VehicleDocument[]
+  vehicleTimeline      VehicleTimelineEvent[]
+  vehicleCosts         VehicleCostAggregate[]
+  vehicleSavedFilters  VehicleSavedFilter[]
+  drivers              Driver[]
+  driverDocuments      DriverDocument[]
+  driverAssignments    DriverVehicleAssignment[]
+  driverTimeline       DriverTimelineEvent[]
 
   @@index([status])
 }
@@ -187,6 +220,7 @@ model Branch {
   memberships Membership[]
   costCenters CostCenter[]
   vehicles    Vehicle[]
+  drivers     Driver[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -205,6 +239,7 @@ model Department {
   teams       Team[]
   memberships Membership[]
   vehicles    Vehicle[]
+  drivers     Driver[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -241,14 +276,14 @@ model Position {
 }
 
 model User {
-  id                  String               @id @default(cuid())
+  id                  String                    @id @default(cuid())
   name                String
-  email               String               @unique
+  email               String                    @unique
   passwordHash        String
   emailVerifiedAt     DateTime?
   passwordChangedAt   DateTime?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
   memberships         Membership[]
   sessions            Session[]
   auditLogs           AuditLog[]
@@ -258,6 +293,10 @@ model User {
   vehicleDocuments    VehicleDocument[]
   vehicleTimeline     VehicleTimelineEvent[]
   vehicleSavedFilters VehicleSavedFilter[]
+  driverProfiles      Driver[]
+  driverDocuments     DriverDocument[]
+  driverAssignments   DriverVehicleAssignment[]
+  driverTimeline      DriverTimelineEvent[]
 }
 
 model Membership {
@@ -561,7 +600,7 @@ model VehicleVersion {
 }
 
 model Vehicle {
-  id                  String                 @id @default(cuid())
+  id                  String                    @id @default(cuid())
   companyId           String
   branchId            String?
   departmentId        String?
@@ -582,31 +621,32 @@ model Vehicle {
   power               String?
   fuelType            VehicleFuelType?
   capacity            String?
-  grossWeight         Decimal?               @db.Decimal(12, 2)
-  netWeight           Decimal?               @db.Decimal(12, 2)
+  grossWeight         Decimal?                  @db.Decimal(12, 2)
+  netWeight           Decimal?                  @db.Decimal(12, 2)
   axleCount           Int?
   vehicleType         String?
   operationalCategory String?
-  status              VehicleStatus          @default(AVAILABLE)
-  estimatedValue      Decimal?               @db.Decimal(14, 2)
-  currentOdometer     Decimal?               @db.Decimal(14, 2)
+  status              VehicleStatus             @default(AVAILABLE)
+  estimatedValue      Decimal?                  @db.Decimal(14, 2)
+  currentOdometer     Decimal?                  @db.Decimal(14, 2)
   observations        String?
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
   archivedAt          DateTime?
-  company             Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  branch              Branch?                @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  department          Department?            @relation(fields: [departmentId], references: [id], onDelete: SetNull)
-  costCenter          CostCenter?            @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
-  category            VehicleCategory?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  subcategory         VehicleSubcategory?    @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
-  make                VehicleMake?           @relation(fields: [makeId], references: [id], onDelete: SetNull)
-  model               VehicleModel?          @relation(fields: [modelId], references: [id], onDelete: SetNull)
-  version             VehicleVersion?        @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  company             Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch              Branch?                   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  department          Department?               @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  costCenter          CostCenter?               @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  category            VehicleCategory?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategory         VehicleSubcategory?       @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  make                VehicleMake?              @relation(fields: [makeId], references: [id], onDelete: SetNull)
+  model               VehicleModel?             @relation(fields: [modelId], references: [id], onDelete: SetNull)
+  version             VehicleVersion?           @relation(fields: [versionId], references: [id], onDelete: SetNull)
   photos              VehiclePhoto[]
   documents           VehicleDocument[]
   timeline            VehicleTimelineEvent[]
   costs               VehicleCostAggregate[]
+  driverAssignments   DriverVehicleAssignment[]
 
   @@unique([companyId, plate])
   @@unique([companyId, renavam])
@@ -618,6 +658,115 @@ model Vehicle {
   @@index([companyId, modelId])
   @@index([companyId, categoryId])
   @@index([companyId, archivedAt])
+}
+
+model Driver {
+  id                      String                    @id @default(cuid())
+  companyId               String
+  branchId                String?
+  departmentId            String?
+  userId                  String?
+  name                    String
+  cpf                     String
+  cnhNumber               String
+  cnhCategory             String
+  cnhIssuedAt             DateTime?
+  cnhExpiresAt            DateTime
+  birthDate               DateTime?
+  hireDate                DateTime?
+  terminationDate         DateTime?
+  phone                   String?
+  email                   String?
+  status                  DriverStatus              @default(ACTIVE)
+  medicalExamExpiresAt    DateTime?
+  toxicologyExamExpiresAt DateTime?
+  notes                   String?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  archivedAt              DateTime?
+  company                 Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch                  Branch?                   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  department              Department?               @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  user                    User?                     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  documents               DriverDocument[]
+  assignments             DriverVehicleAssignment[]
+  timeline                DriverTimelineEvent[]
+
+  @@unique([companyId, cpf])
+  @@unique([companyId, cnhNumber])
+  @@index([companyId, status])
+  @@index([companyId, branchId])
+  @@index([companyId, cnhExpiresAt])
+  @@index([companyId, medicalExamExpiresAt])
+  @@index([userId])
+  @@index([archivedAt])
+}
+
+model DriverDocument {
+  id              String             @id @default(cuid())
+  companyId       String
+  driverId        String
+  type            DriverDocumentType
+  storageKey      String
+  url             String
+  fileName        String
+  mimeType        String
+  sizeInBytes     Int?
+  issueDate       DateTime?
+  expiresAt       DateTime?
+  alertDaysBefore Int                @default(30)
+  notes           String?
+  uploadedById    String?
+  uploadedAt      DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  company         Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver          Driver             @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  uploadedBy      User?              @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, expiresAt])
+  @@index([driverId, type])
+  @@index([uploadedById])
+}
+
+model DriverVehicleAssignment {
+  id           String    @id @default(cuid())
+  companyId    String
+  driverId     String
+  vehicleId    String
+  startsAt     DateTime  @default(now())
+  endsAt       DateTime?
+  isPrimary    Boolean   @default(true)
+  notes        String?
+  assignedById String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver       Driver    @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  vehicle      Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  assignedBy   User?     @relation(fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, endsAt])
+  @@index([driverId, startsAt])
+  @@index([vehicleId, endsAt])
+}
+
+model DriverTimelineEvent {
+  id          String             @id @default(cuid())
+  companyId   String
+  driverId    String
+  type        DriverTimelineType
+  title       String
+  description String?
+  metadata    Json?
+  actorId     String?
+  createdAt   DateTime           @default(now())
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver      Driver             @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  actor       User?              @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([driverId, createdAt])
+  @@index([actorId])
 }
 
 model VehiclePhoto {
