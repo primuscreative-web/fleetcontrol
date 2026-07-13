@@ -117,9 +117,9 @@ Implemented in this phase:
 - ESLint, Prettier, Husky, lint-staged, Commitlint.
 - CI workflow.
 
-Still deferred:
+Remaining roadmap:
 
-- Finance.
-- Auto parts, suppliers and inventory with weighted-average costing.
-- Checklists.
-- Reports.
+- Finance and accounting integrations.
+- Operational checklists.
+- Cross-domain reports and analytics.
+- GPS, maps and external notification integrations.
