@@ -218,6 +218,39 @@ enum FuelingSource {
   INTEGRATION
 }
 
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  PREDICTIVE
+  INSPECTION
+  CAMPAIGN
+}
+
+enum MaintenancePriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum MaintenanceOrderStatus {
+  DRAFT
+  AWAITING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum MaintenanceItemType {
+  LABOR
+  PART
+  SERVICE
+  FEE
+}
+
 model Company {
   id                   String                      @id @default(cuid())
   name                 String
@@ -266,26 +299,30 @@ model Company {
   fuelStations         FuelStation[]
   fuelPrices           FuelPrice[]
   fuelings             Fueling[]
+  maintenancePlans     MaintenancePlan[]
+  maintenanceOrders    MaintenanceOrder[]
+  maintenanceItems     MaintenanceOrderItem[]
 
   @@index([status])
 }
 
 model Branch {
-  id           String        @id @default(cuid())
-  name         String
-  code         String?
-  companyId    String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  departments  Department[]
-  memberships  Membership[]
-  costCenters  CostCenter[]
-  vehicles     Vehicle[]
-  drivers      Driver[]
-  contracts    Contract[]
-  fuelStations FuelStation[]
-  fuelings     Fueling[]
+  id                String             @id @default(cuid())
+  name              String
+  code              String?
+  companyId         String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departments       Department[]
+  memberships       Membership[]
+  costCenters       CostCenter[]
+  vehicles          Vehicle[]
+  drivers           Driver[]
+  contracts         Contract[]
+  fuelStations      FuelStation[]
+  fuelings          Fueling[]
+  maintenanceOrders MaintenanceOrder[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -341,35 +378,38 @@ model Position {
 }
 
 model User {
-  id                  String                      @id @default(cuid())
-  name                String
-  email               String                      @unique
-  passwordHash        String
-  emailVerifiedAt     DateTime?
-  passwordChangedAt   DateTime?
-  createdAt           DateTime                    @default(now())
-  updatedAt           DateTime                    @updatedAt
-  memberships         Membership[]
-  sessions            Session[]
-  auditLogs           AuditLog[]
-  notifications       Notification[]
-  passwordResetTokens PasswordResetToken[]
-  vehiclePhotos       VehiclePhoto[]
-  vehicleDocuments    VehicleDocument[]
-  vehicleTimeline     VehicleTimelineEvent[]
-  vehicleSavedFilters VehicleSavedFilter[]
-  driverProfiles      Driver[]
-  driverDocuments     DriverDocument[]
-  driverAssignments   DriverVehicleAssignment[]
-  driverTimeline      DriverTimelineEvent[]
-  managedContracts    Contract[]
-  contractAmendments  ContractAmendment[]
-  contractDocuments   ContractDocument[]
-  contractAllocations ContractVehicleAllocation[]
-  contractTimeline    ContractTimelineEvent[]
-  fuelPricesCreated   FuelPrice[]
-  fuelingsCreated     Fueling[]                   @relation("FuelingCreatedBy")
-  fuelingsApproved    Fueling[]                   @relation("FuelingApprovedBy")
+  id                   String                      @id @default(cuid())
+  name                 String
+  email                String                      @unique
+  passwordHash         String
+  emailVerifiedAt      DateTime?
+  passwordChangedAt    DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  memberships          Membership[]
+  sessions             Session[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  passwordResetTokens  PasswordResetToken[]
+  vehiclePhotos        VehiclePhoto[]
+  vehicleDocuments     VehicleDocument[]
+  vehicleTimeline      VehicleTimelineEvent[]
+  vehicleSavedFilters  VehicleSavedFilter[]
+  driverProfiles       Driver[]
+  driverDocuments      DriverDocument[]
+  driverAssignments    DriverVehicleAssignment[]
+  driverTimeline       DriverTimelineEvent[]
+  managedContracts     Contract[]
+  contractAmendments   ContractAmendment[]
+  contractDocuments    ContractDocument[]
+  contractAllocations  ContractVehicleAllocation[]
+  contractTimeline     ContractTimelineEvent[]
+  fuelPricesCreated    FuelPrice[]
+  fuelingsCreated      Fueling[]                   @relation("FuelingCreatedBy")
+  fuelingsApproved     Fueling[]                   @relation("FuelingApprovedBy")
+  maintenanceRequested MaintenanceOrder[]          @relation("MaintenanceRequestedBy")
+  maintenanceApproved  MaintenanceOrder[]          @relation("MaintenanceApprovedBy")
+  maintenanceCompleted MaintenanceOrder[]          @relation("MaintenanceCompletedBy")
 }
 
 model Membership {
@@ -723,6 +763,8 @@ model Vehicle {
   driverAssignments   DriverVehicleAssignment[]
   contractAllocations ContractVehicleAllocation[]
   fuelings            Fueling[]
+  maintenancePlans    MaintenancePlan[]
+  maintenanceOrders   MaintenanceOrder[]
 
   @@unique([companyId, plate])
   @@unique([companyId, renavam])
@@ -1180,4 +1222,106 @@ model VehicleSavedFilter {
 
   @@unique([companyId, userId, scope, name])
   @@index([companyId, userId, scope])
+}
+
+model MaintenancePlan {
+  id              String             @id @default(cuid())
+  companyId       String
+  vehicleId       String
+  name            String
+  description     String?
+  type            MaintenanceType    @default(PREVENTIVE)
+  intervalDays    Int?
+  intervalKm      Decimal?           @db.Decimal(14, 2)
+  lastPerformedAt DateTime?
+  lastOdometer    Decimal?           @db.Decimal(14, 2)
+  nextDueAt       DateTime?
+  nextDueOdometer Decimal?           @db.Decimal(14, 2)
+  alertDaysBefore Int                @default(15)
+  alertKmBefore   Decimal?           @db.Decimal(14, 2)
+  estimatedCost   Decimal?           @db.Decimal(14, 2)
+  active          Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  archivedAt      DateTime?
+  company         Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vehicle         Vehicle            @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  orders          MaintenanceOrder[]
+
+  @@unique([companyId, vehicleId, name])
+  @@index([companyId, nextDueAt])
+  @@index([companyId, active])
+  @@index([vehicleId, nextDueOdometer])
+}
+
+model MaintenanceOrder {
+  id                    String                 @id @default(cuid())
+  companyId             String
+  branchId              String?
+  vehicleId             String
+  planId                String?
+  requestedById         String?
+  approvedById          String?
+  completedById         String?
+  code                  String
+  title                 String
+  description           String?
+  diagnosis             String?
+  resolution            String?
+  type                  MaintenanceType
+  priority              MaintenancePriority    @default(NORMAL)
+  status                MaintenanceOrderStatus @default(DRAFT)
+  previousVehicleStatus VehicleStatus?
+  odometer              Decimal                @db.Decimal(14, 2)
+  scheduledAt           DateTime?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  downtimeStartedAt     DateTime?
+  downtimeEndedAt       DateTime?
+  estimatedCost         Decimal?               @db.Decimal(14, 2)
+  actualCost            Decimal                @default(0) @db.Decimal(14, 2)
+  approvalNotes         String?
+  rejectionReason       String?
+  invoiceNumber         String?
+  warrantyUntil         DateTime?
+  notes                 String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  archivedAt            DateTime?
+  company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch                Branch?                @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  vehicle               Vehicle                @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  plan                  MaintenancePlan?       @relation(fields: [planId], references: [id], onDelete: SetNull)
+  requestedBy           User?                  @relation("MaintenanceRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  approvedBy            User?                  @relation("MaintenanceApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  completedBy           User?                  @relation("MaintenanceCompletedBy", fields: [completedById], references: [id], onDelete: SetNull)
+  items                 MaintenanceOrderItem[]
+
+  @@unique([companyId, code])
+  @@index([companyId, status, priority])
+  @@index([companyId, scheduledAt])
+  @@index([companyId, branchId])
+  @@index([vehicleId, createdAt])
+  @@index([planId])
+}
+
+model MaintenanceOrderItem {
+  id          String              @id @default(cuid())
+  companyId   String
+  orderId     String
+  type        MaintenanceItemType
+  description String
+  sku         String?
+  quantity    Decimal             @default(1) @db.Decimal(12, 3)
+  unitCost    Decimal             @default(0) @db.Decimal(14, 4)
+  totalCost   Decimal             @default(0) @db.Decimal(14, 2)
+  notes       String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  company     Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  order       MaintenanceOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, type])
+  @@index([orderId])
+  @@index([companyId, sku])
 }

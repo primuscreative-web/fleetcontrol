@@ -40,4 +40,11 @@ describe("authz", () => {
     expect(hasPermission("purchasing", permissions.fuel.stations)).toBe(true);
     expect(hasPermission("viewer", permissions.fuel.manage)).toBe(false);
   });
+  it("separates maintenance execution, approval and plan administration", () => {
+    expect(hasPermission("operator", permissions.maintenance.manage)).toBe(true);
+    expect(hasPermission("operator", permissions.maintenance.complete)).toBe(true);
+    expect(hasPermission("operator", permissions.maintenance.approve)).toBe(false);
+    expect(hasPermission("supervisor", permissions.maintenance.approve)).toBe(true);
+    expect(hasPermission("finance", permissions.maintenance.manage)).toBe(false);
+  });
 });

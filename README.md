@@ -104,6 +104,8 @@ Implemented in this phase:
   historical vehicle allocation.
 - Fuel station and price history, controlled fueling approval, anomaly detection, consumption,
   cost aggregation, audit events, and operational dashboard.
+- Preventive maintenance plans, approval-based work orders, downtime, itemized costs, warranties,
+  vehicle lifecycle integration, and due-soon dashboard.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.

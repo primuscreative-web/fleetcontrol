@@ -14,6 +14,7 @@ import {
   ContactRound,
   ScrollText,
   Fuel,
+  Wrench,
 } from "lucide-react";
 
 export const navigationItems: Array<{
@@ -46,6 +47,12 @@ export const navigationItems: Array<{
     href: "/dashboard/abastecimentos",
     icon: Fuel,
     permission: permissions.fuel.read,
+  },
+  {
+    label: "Manutencao",
+    href: "/dashboard/manutencao",
+    icon: Wrench,
+    permission: permissions.maintenance.read,
   },
   {
     label: "Empresa",

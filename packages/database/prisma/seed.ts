@@ -60,6 +60,11 @@ const permissions = [
   ["fuel", "approve"],
   ["fuel", "stations"],
   ["fuel", "import"],
+  ["maintenance", "read"],
+  ["maintenance", "manage"],
+  ["maintenance", "approve"],
+  ["maintenance", "plans"],
+  ["maintenance", "complete"],
 ] as const;
 
 const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
@@ -104,6 +109,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fuel:approve",
     "fuel:stations",
     "fuel:import",
+    "maintenance:read",
+    "maintenance:manage",
+    "maintenance:approve",
+    "maintenance:plans",
+    "maintenance:complete",
   ],
   director: [
     "company:read",
@@ -118,6 +128,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "drivers:read",
     "contracts:read",
     "fuel:read",
+    "maintenance:read",
   ],
   manager: [
     "company:read",
@@ -146,6 +157,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fuel:approve",
     "fuel:stations",
     "fuel:import",
+    "maintenance:read",
+    "maintenance:manage",
+    "maintenance:approve",
+    "maintenance:plans",
+    "maintenance:complete",
   ],
   supervisor: [
     "company:read",
@@ -169,6 +185,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fuel:manage",
     "fuel:approve",
     "fuel:stations",
+    "maintenance:read",
+    "maintenance:manage",
+    "maintenance:approve",
+    "maintenance:plans",
+    "maintenance:complete",
   ],
   finance: [
     "company:read",
@@ -178,6 +199,8 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:read",
     "fuel:read",
     "fuel:approve",
+    "maintenance:read",
+    "maintenance:approve",
   ],
   purchasing: [
     "company:read",
@@ -191,6 +214,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:documents",
     "fuel:read",
     "fuel:stations",
+    "maintenance:read",
   ],
   operator: [
     "company:read",
@@ -207,6 +231,9 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:documents",
     "fuel:read",
     "fuel:manage",
+    "maintenance:read",
+    "maintenance:manage",
+    "maintenance:complete",
   ],
   driver: ["company:read", "notifications:read", "fleet:read"],
   viewer: ["company:read", "notifications:read", "fleet:read"],

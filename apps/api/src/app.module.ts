@@ -25,6 +25,7 @@ import { FleetModule } from "./modules/fleet/fleet.module";
 import { FuelModule } from "./modules/fuel/fuel.module";
 import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
+import { MaintenanceModule } from "./modules/maintenance/maintenance.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { StorageModule } from "./modules/storage/storage.module";
@@ -64,6 +65,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     DriversModule,
     ContractsModule,
     FuelModule,
+    MaintenanceModule,
     MailModule,
     NotificationsModule,
     HealthModule,

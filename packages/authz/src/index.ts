@@ -69,6 +69,13 @@ export const permissions = {
     stations: "fuel:stations",
     import: "fuel:import",
   },
+  maintenance: {
+    read: "maintenance:read",
+    manage: "maintenance:manage",
+    approve: "maintenance:approve",
+    plans: "maintenance:plans",
+    complete: "maintenance:complete",
+  },
 } as const;
 
 type PermissionValue<T> = T extends Record<string, infer TValue> ? TValue : never;
@@ -118,6 +125,11 @@ export const roles = {
     permissions.fuel.approve,
     permissions.fuel.stations,
     permissions.fuel.import,
+    permissions.maintenance.read,
+    permissions.maintenance.manage,
+    permissions.maintenance.approve,
+    permissions.maintenance.plans,
+    permissions.maintenance.complete,
   ],
   companyAdmin: [
     permissions.company.read,
@@ -159,6 +171,11 @@ export const roles = {
     permissions.fuel.approve,
     permissions.fuel.stations,
     permissions.fuel.import,
+    permissions.maintenance.read,
+    permissions.maintenance.manage,
+    permissions.maintenance.approve,
+    permissions.maintenance.plans,
+    permissions.maintenance.complete,
   ],
   director: [
     permissions.company.read,
@@ -173,6 +190,7 @@ export const roles = {
     permissions.drivers.read,
     permissions.contracts.read,
     permissions.fuel.read,
+    permissions.maintenance.read,
   ],
   manager: [
     permissions.company.read,
@@ -201,6 +219,11 @@ export const roles = {
     permissions.fuel.approve,
     permissions.fuel.stations,
     permissions.fuel.import,
+    permissions.maintenance.read,
+    permissions.maintenance.manage,
+    permissions.maintenance.approve,
+    permissions.maintenance.plans,
+    permissions.maintenance.complete,
   ],
   supervisor: [
     permissions.company.read,
@@ -224,6 +247,11 @@ export const roles = {
     permissions.fuel.manage,
     permissions.fuel.approve,
     permissions.fuel.stations,
+    permissions.maintenance.read,
+    permissions.maintenance.manage,
+    permissions.maintenance.approve,
+    permissions.maintenance.plans,
+    permissions.maintenance.complete,
   ],
   finance: [
     permissions.company.read,
@@ -233,6 +261,8 @@ export const roles = {
     permissions.contracts.read,
     permissions.fuel.read,
     permissions.fuel.approve,
+    permissions.maintenance.read,
+    permissions.maintenance.approve,
   ],
   purchasing: [
     permissions.company.read,
@@ -246,6 +276,7 @@ export const roles = {
     permissions.contracts.documents,
     permissions.fuel.read,
     permissions.fuel.stations,
+    permissions.maintenance.read,
   ],
   operator: [
     permissions.company.read,
@@ -262,6 +293,9 @@ export const roles = {
     permissions.contracts.documents,
     permissions.fuel.read,
     permissions.fuel.manage,
+    permissions.maintenance.read,
+    permissions.maintenance.manage,
+    permissions.maintenance.complete,
   ],
   driver: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],
   viewer: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],
