@@ -251,6 +251,45 @@ enum MaintenanceItemType {
   FEE
 }
 
+enum TireStatus {
+  IN_STOCK
+  INSTALLED
+  IN_REPAIR
+  IN_RETREAD
+  SCRAPPED
+  LOST
+}
+
+enum TireCondition {
+  NEW
+  GOOD
+  FAIR
+  CRITICAL
+  CONDEMNED
+}
+
+enum TireMovementType {
+  PURCHASE
+  INSTALL
+  REMOVE
+  ROTATE
+  SEND_REPAIR
+  RETURN_REPAIR
+  RETREAD
+  TRANSFER
+  SCRAP
+  ADJUSTMENT
+}
+
+enum TireRetreadStatus {
+  REQUESTED
+  SENT
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
 model Company {
   id                   String                      @id @default(cuid())
   name                 String
@@ -302,6 +341,10 @@ model Company {
   maintenancePlans     MaintenancePlan[]
   maintenanceOrders    MaintenanceOrder[]
   maintenanceItems     MaintenanceOrderItem[]
+  tires                Tire[]
+  tireMovements        TireMovement[]
+  tireInspections      TireInspection[]
+  tireRetreads         TireRetread[]
 
   @@index([status])
 }
@@ -323,6 +366,7 @@ model Branch {
   fuelStations      FuelStation[]
   fuelings          Fueling[]
   maintenanceOrders MaintenanceOrder[]
+  tires             Tire[]
 
   @@unique([companyId, name])
   @@index([companyId])
@@ -378,38 +422,41 @@ model Position {
 }
 
 model User {
-  id                   String                      @id @default(cuid())
-  name                 String
-  email                String                      @unique
-  passwordHash         String
-  emailVerifiedAt      DateTime?
-  passwordChangedAt    DateTime?
-  createdAt            DateTime                    @default(now())
-  updatedAt            DateTime                    @updatedAt
-  memberships          Membership[]
-  sessions             Session[]
-  auditLogs            AuditLog[]
-  notifications        Notification[]
-  passwordResetTokens  PasswordResetToken[]
-  vehiclePhotos        VehiclePhoto[]
-  vehicleDocuments     VehicleDocument[]
-  vehicleTimeline      VehicleTimelineEvent[]
-  vehicleSavedFilters  VehicleSavedFilter[]
-  driverProfiles       Driver[]
-  driverDocuments      DriverDocument[]
-  driverAssignments    DriverVehicleAssignment[]
-  driverTimeline       DriverTimelineEvent[]
-  managedContracts     Contract[]
-  contractAmendments   ContractAmendment[]
-  contractDocuments    ContractDocument[]
-  contractAllocations  ContractVehicleAllocation[]
-  contractTimeline     ContractTimelineEvent[]
-  fuelPricesCreated    FuelPrice[]
-  fuelingsCreated      Fueling[]                   @relation("FuelingCreatedBy")
-  fuelingsApproved     Fueling[]                   @relation("FuelingApprovedBy")
-  maintenanceRequested MaintenanceOrder[]          @relation("MaintenanceRequestedBy")
-  maintenanceApproved  MaintenanceOrder[]          @relation("MaintenanceApprovedBy")
-  maintenanceCompleted MaintenanceOrder[]          @relation("MaintenanceCompletedBy")
+  id                     String                      @id @default(cuid())
+  name                   String
+  email                  String                      @unique
+  passwordHash           String
+  emailVerifiedAt        DateTime?
+  passwordChangedAt      DateTime?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  memberships            Membership[]
+  sessions               Session[]
+  auditLogs              AuditLog[]
+  notifications          Notification[]
+  passwordResetTokens    PasswordResetToken[]
+  vehiclePhotos          VehiclePhoto[]
+  vehicleDocuments       VehicleDocument[]
+  vehicleTimeline        VehicleTimelineEvent[]
+  vehicleSavedFilters    VehicleSavedFilter[]
+  driverProfiles         Driver[]
+  driverDocuments        DriverDocument[]
+  driverAssignments      DriverVehicleAssignment[]
+  driverTimeline         DriverTimelineEvent[]
+  managedContracts       Contract[]
+  contractAmendments     ContractAmendment[]
+  contractDocuments      ContractDocument[]
+  contractAllocations    ContractVehicleAllocation[]
+  contractTimeline       ContractTimelineEvent[]
+  fuelPricesCreated      FuelPrice[]
+  fuelingsCreated        Fueling[]                   @relation("FuelingCreatedBy")
+  fuelingsApproved       Fueling[]                   @relation("FuelingApprovedBy")
+  maintenanceRequested   MaintenanceOrder[]          @relation("MaintenanceRequestedBy")
+  maintenanceApproved    MaintenanceOrder[]          @relation("MaintenanceApprovedBy")
+  maintenanceCompleted   MaintenanceOrder[]          @relation("MaintenanceCompletedBy")
+  tireMovementsCreated   TireMovement[]              @relation("TireMovementCreatedBy")
+  tireInspectionsCreated TireInspection[]            @relation("TireInspectionCreatedBy")
+  tireRetreadsCreated    TireRetread[]               @relation("TireRetreadCreatedBy")
 }
 
 model Membership {
@@ -765,6 +812,10 @@ model Vehicle {
   fuelings            Fueling[]
   maintenancePlans    MaintenancePlan[]
   maintenanceOrders   MaintenanceOrder[]
+  installedTires      Tire[]                      @relation("TireCurrentVehicle")
+  tireMovementsFrom   TireMovement[]              @relation("TireMovementFromVehicle")
+  tireMovementsTo     TireMovement[]              @relation("TireMovementToVehicle")
+  tireInspections     TireInspection[]
 
   @@unique([companyId, plate])
   @@unique([companyId, renavam])
@@ -1324,4 +1375,144 @@ model MaintenanceOrderItem {
   @@index([companyId, type])
   @@index([orderId])
   @@index([companyId, sku])
+}
+
+model Tire {
+  id                     String           @id @default(cuid())
+  companyId              String
+  branchId               String?
+  currentVehicleId       String?
+  serialNumber           String
+  fireNumber             String?
+  brand                  String
+  model                  String
+  size                   String
+  dot                    String?
+  loadIndex              String?
+  speedIndex             String?
+  manufacturerAt         DateTime?
+  purchasedAt            DateTime?
+  purchaseCost           Decimal?         @db.Decimal(14, 2)
+  supplierName           String?
+  invoiceNumber          String?
+  warrantyUntil          DateTime?
+  status                 TireStatus       @default(IN_STOCK)
+  condition              TireCondition    @default(NEW)
+  currentPosition        String?
+  installedAt            DateTime?
+  installedOdometer      Decimal?         @db.Decimal(14, 2)
+  accumulatedKm          Decimal          @default(0) @db.Decimal(14, 2)
+  initialTreadDepthMm    Decimal?         @db.Decimal(6, 2)
+  currentTreadDepthMm    Decimal?         @db.Decimal(6, 2)
+  minimumTreadDepthMm    Decimal          @default(1.6) @db.Decimal(6, 2)
+  recommendedPressurePsi Decimal?         @db.Decimal(6, 2)
+  retreadCount           Int              @default(0)
+  maxRetreads            Int              @default(2)
+  totalLifecycleCost     Decimal          @default(0) @db.Decimal(14, 2)
+  scrappedAt             DateTime?
+  scrapReason            String?
+  notes                  String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  archivedAt             DateTime?
+  company                Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch                 Branch?          @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  currentVehicle         Vehicle?         @relation("TireCurrentVehicle", fields: [currentVehicleId], references: [id], onDelete: SetNull)
+  movements              TireMovement[]
+  inspections            TireInspection[]
+  retreads               TireRetread[]
+
+  @@unique([companyId, serialNumber])
+  @@unique([currentVehicleId, currentPosition])
+  @@index([companyId, status, condition])
+  @@index([companyId, branchId])
+  @@index([companyId, warrantyUntil])
+  @@index([currentVehicleId])
+  @@index([archivedAt])
+}
+
+model TireMovement {
+  id            String           @id @default(cuid())
+  companyId     String
+  tireId        String
+  fromVehicleId String?
+  toVehicleId   String?
+  createdById   String?
+  type          TireMovementType
+  fromPosition  String?
+  toPosition    String?
+  odometer      Decimal?         @db.Decimal(14, 2)
+  occurredAt    DateTime         @default(now())
+  reason        String?
+  cost          Decimal          @default(0) @db.Decimal(14, 2)
+  metadata      Json?
+  createdAt     DateTime         @default(now())
+  company       Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tire          Tire             @relation(fields: [tireId], references: [id], onDelete: Cascade)
+  fromVehicle   Vehicle?         @relation("TireMovementFromVehicle", fields: [fromVehicleId], references: [id], onDelete: SetNull)
+  toVehicle     Vehicle?         @relation("TireMovementToVehicle", fields: [toVehicleId], references: [id], onDelete: SetNull)
+  createdBy     User?            @relation("TireMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, occurredAt])
+  @@index([tireId, occurredAt])
+  @@index([fromVehicleId])
+  @@index([toVehicleId])
+}
+
+model TireInspection {
+  id                  String        @id @default(cuid())
+  companyId           String
+  tireId              String
+  vehicleId           String?
+  createdById         String?
+  inspectedAt         DateTime      @default(now())
+  odometer            Decimal?      @db.Decimal(14, 2)
+  pressurePsi         Decimal?      @db.Decimal(6, 2)
+  treadDepthInnerMm   Decimal?      @db.Decimal(6, 2)
+  treadDepthCenterMm  Decimal?      @db.Decimal(6, 2)
+  treadDepthOuterMm   Decimal?      @db.Decimal(6, 2)
+  averageTreadDepthMm Decimal?      @db.Decimal(6, 2)
+  condition           TireCondition
+  irregularWear       Boolean       @default(false)
+  hasDamage           Boolean       @default(false)
+  recommendedAction   String?
+  photoStorageKey     String?
+  photoUrl            String?
+  notes               String?
+  createdAt           DateTime      @default(now())
+  company             Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tire                Tire          @relation(fields: [tireId], references: [id], onDelete: Cascade)
+  vehicle             Vehicle?      @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  createdBy           User?         @relation("TireInspectionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, inspectedAt])
+  @@index([tireId, inspectedAt])
+  @@index([vehicleId])
+}
+
+model TireRetread {
+  id              String            @id @default(cuid())
+  companyId       String
+  tireId          String
+  createdById     String?
+  status          TireRetreadStatus @default(REQUESTED)
+  providerName    String
+  requestedAt     DateTime          @default(now())
+  sentAt          DateTime?
+  completedAt     DateTime?
+  costAllocatedAt DateTime?
+  cost            Decimal           @default(0) @db.Decimal(14, 2)
+  newTreadDepthMm Decimal?          @db.Decimal(6, 2)
+  warrantyUntil   DateTime?
+  invoiceNumber   String?
+  rejectionReason String?
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tire            Tire              @relation(fields: [tireId], references: [id], onDelete: Cascade)
+  createdBy       User?             @relation("TireRetreadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([companyId, status])
+  @@index([tireId, requestedAt])
 }

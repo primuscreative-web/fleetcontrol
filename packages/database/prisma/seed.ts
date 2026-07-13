@@ -65,6 +65,12 @@ const permissions = [
   ["maintenance", "approve"],
   ["maintenance", "plans"],
   ["maintenance", "complete"],
+  ["tires", "read"],
+  ["tires", "manage"],
+  ["tires", "move"],
+  ["tires", "inspect"],
+  ["tires", "retread"],
+  ["tires", "scrap"],
 ] as const;
 
 const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
@@ -114,6 +120,12 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "maintenance:approve",
     "maintenance:plans",
     "maintenance:complete",
+    "tires:read",
+    "tires:manage",
+    "tires:move",
+    "tires:inspect",
+    "tires:retread",
+    "tires:scrap",
   ],
   director: [
     "company:read",
@@ -129,6 +141,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:read",
     "fuel:read",
     "maintenance:read",
+    "tires:read",
   ],
   manager: [
     "company:read",
@@ -162,6 +175,12 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "maintenance:approve",
     "maintenance:plans",
     "maintenance:complete",
+    "tires:read",
+    "tires:manage",
+    "tires:move",
+    "tires:inspect",
+    "tires:retread",
+    "tires:scrap",
   ],
   supervisor: [
     "company:read",
@@ -190,6 +209,12 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "maintenance:approve",
     "maintenance:plans",
     "maintenance:complete",
+    "tires:read",
+    "tires:manage",
+    "tires:move",
+    "tires:inspect",
+    "tires:retread",
+    "tires:scrap",
   ],
   finance: [
     "company:read",
@@ -201,6 +226,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fuel:approve",
     "maintenance:read",
     "maintenance:approve",
+    "tires:read",
   ],
   purchasing: [
     "company:read",
@@ -215,6 +241,9 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fuel:read",
     "fuel:stations",
     "maintenance:read",
+    "tires:read",
+    "tires:manage",
+    "tires:retread",
   ],
   operator: [
     "company:read",
@@ -234,6 +263,9 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "maintenance:read",
     "maintenance:manage",
     "maintenance:complete",
+    "tires:read",
+    "tires:move",
+    "tires:inspect",
   ],
   driver: ["company:read", "notifications:read", "fleet:read"],
   viewer: ["company:read", "notifications:read", "fleet:read"],

@@ -76,6 +76,14 @@ export const permissions = {
     plans: "maintenance:plans",
     complete: "maintenance:complete",
   },
+  tires: {
+    read: "tires:read",
+    manage: "tires:manage",
+    move: "tires:move",
+    inspect: "tires:inspect",
+    retread: "tires:retread",
+    scrap: "tires:scrap",
+  },
 } as const;
 
 type PermissionValue<T> = T extends Record<string, infer TValue> ? TValue : never;
@@ -130,6 +138,12 @@ export const roles = {
     permissions.maintenance.approve,
     permissions.maintenance.plans,
     permissions.maintenance.complete,
+    permissions.tires.read,
+    permissions.tires.manage,
+    permissions.tires.move,
+    permissions.tires.inspect,
+    permissions.tires.retread,
+    permissions.tires.scrap,
   ],
   companyAdmin: [
     permissions.company.read,
@@ -176,6 +190,12 @@ export const roles = {
     permissions.maintenance.approve,
     permissions.maintenance.plans,
     permissions.maintenance.complete,
+    permissions.tires.read,
+    permissions.tires.manage,
+    permissions.tires.move,
+    permissions.tires.inspect,
+    permissions.tires.retread,
+    permissions.tires.scrap,
   ],
   director: [
     permissions.company.read,
@@ -191,6 +211,7 @@ export const roles = {
     permissions.contracts.read,
     permissions.fuel.read,
     permissions.maintenance.read,
+    permissions.tires.read,
   ],
   manager: [
     permissions.company.read,
@@ -224,6 +245,12 @@ export const roles = {
     permissions.maintenance.approve,
     permissions.maintenance.plans,
     permissions.maintenance.complete,
+    permissions.tires.read,
+    permissions.tires.manage,
+    permissions.tires.move,
+    permissions.tires.inspect,
+    permissions.tires.retread,
+    permissions.tires.scrap,
   ],
   supervisor: [
     permissions.company.read,
@@ -252,6 +279,12 @@ export const roles = {
     permissions.maintenance.approve,
     permissions.maintenance.plans,
     permissions.maintenance.complete,
+    permissions.tires.read,
+    permissions.tires.manage,
+    permissions.tires.move,
+    permissions.tires.inspect,
+    permissions.tires.retread,
+    permissions.tires.scrap,
   ],
   finance: [
     permissions.company.read,
@@ -263,6 +296,7 @@ export const roles = {
     permissions.fuel.approve,
     permissions.maintenance.read,
     permissions.maintenance.approve,
+    permissions.tires.read,
   ],
   purchasing: [
     permissions.company.read,
@@ -277,6 +311,9 @@ export const roles = {
     permissions.fuel.read,
     permissions.fuel.stations,
     permissions.maintenance.read,
+    permissions.tires.read,
+    permissions.tires.manage,
+    permissions.tires.retread,
   ],
   operator: [
     permissions.company.read,
@@ -296,6 +333,9 @@ export const roles = {
     permissions.maintenance.read,
     permissions.maintenance.manage,
     permissions.maintenance.complete,
+    permissions.tires.read,
+    permissions.tires.move,
+    permissions.tires.inspect,
   ],
   driver: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],
   viewer: [permissions.company.read, permissions.notifications.read, permissions.fleet.read],

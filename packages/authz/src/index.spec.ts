@@ -47,4 +47,11 @@ describe("authz", () => {
     expect(hasPermission("supervisor", permissions.maintenance.approve)).toBe(true);
     expect(hasPermission("finance", permissions.maintenance.manage)).toBe(false);
   });
+  it("separates tire movement, inspection, retread and disposal", () => {
+    expect(hasPermission("operator", permissions.tires.move)).toBe(true);
+    expect(hasPermission("operator", permissions.tires.inspect)).toBe(true);
+    expect(hasPermission("operator", permissions.tires.scrap)).toBe(false);
+    expect(hasPermission("purchasing", permissions.tires.retread)).toBe(true);
+    expect(hasPermission("finance", permissions.tires.manage)).toBe(false);
+  });
 });

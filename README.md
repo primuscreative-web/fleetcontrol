@@ -106,6 +106,8 @@ Implemented in this phase:
   cost aggregation, audit events, and operational dashboard.
 - Preventive maintenance plans, approval-based work orders, downtime, itemized costs, warranties,
   vehicle lifecycle integration, and due-soon dashboard.
+- Serialized tire assets, vehicle positions, inspections, rotations, retreads, safety alerts,
+  lifecycle mileage, and cost-per-kilometer analytics.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.
@@ -116,7 +118,6 @@ Implemented in this phase:
 Still deferred:
 
 - Finance.
-- Tires.
 - Workshops.
 - Auto parts.
 - Checklists.

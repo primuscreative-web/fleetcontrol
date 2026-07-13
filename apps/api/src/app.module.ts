@@ -30,6 +30,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { SettingsModule } from "./modules/settings/settings.module";
 import { StorageModule } from "./modules/storage/storage.module";
 import { TenancyModule } from "./modules/tenancy/tenancy.module";
+import { TiresModule } from "./modules/tires/tires.module";
 import { UsersModule } from "./modules/users/users.module";
 import { PrismaModule } from "./shared/infrastructure/prisma.module";
 
@@ -66,6 +67,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     ContractsModule,
     FuelModule,
     MaintenanceModule,
+    TiresModule,
     MailModule,
     NotificationsModule,
     HealthModule,
