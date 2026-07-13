@@ -96,6 +96,8 @@ Implemented in this phase:
 - Company, branch, department, team, position, and user SaaS structures.
 - Audit logs, event outbox, notification center, settings, feature flags, Redis cache, and storage provider abstraction.
 - Versioned Prisma migration and idempotent bootstrap seed for the first Global Administrator.
+- Fleet vehicle lifecycle, dashboards, documents, photos, cost visibility, archived records, and
+  user-owned saved filter views.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.
@@ -103,9 +105,8 @@ Implemented in this phase:
 - ESLint, Prettier, Husky, lint-staged, Commitlint.
 - CI workflow.
 
-Deferred by design:
+Still deferred:
 
-- Vehicle registration.
 - Drivers.
 - Finance.
 - Contracts.

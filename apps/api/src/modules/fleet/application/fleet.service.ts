@@ -19,6 +19,7 @@ import type {
   ArchiveVehicleDto,
   ChangeVehicleStatusDto,
   CreateFleetCatalogDto,
+  CreateVehicleSavedFilterDto,
   CreateVehicleDocumentDto,
   CreateVehicleDto,
   CreateVehiclePhotoDto,
@@ -169,6 +170,98 @@ export class FleetService {
       models,
       versions,
     };
+  }
+
+  listSavedFilters(principal: RequestPrincipal) {
+    return this.prisma.vehicleSavedFilter.findMany({
+      where: {
+        companyId: principal.companyId,
+        userId: principal.userId,
+        scope: "fleet.vehicles",
+      },
+      orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+    });
+  }
+
+  async createSavedFilter(
+    principal: RequestPrincipal,
+    dto: CreateVehicleSavedFilterDto,
+    device?: RequestDevice,
+  ) {
+    const filter = await this.prisma.$transaction(async (transaction) => {
+      if (dto.isDefault) {
+        await transaction.vehicleSavedFilter.updateMany({
+          where: {
+            companyId: principal.companyId,
+            userId: principal.userId,
+            scope: "fleet.vehicles",
+          },
+          data: { isDefault: false },
+        });
+      }
+
+      return transaction.vehicleSavedFilter.upsert({
+        where: {
+          companyId_userId_scope_name: {
+            companyId: principal.companyId,
+            userId: principal.userId,
+            scope: "fleet.vehicles",
+            name: dto.name.trim(),
+          },
+        },
+        create: {
+          companyId: principal.companyId,
+          userId: principal.userId,
+          scope: "fleet.vehicles",
+          name: dto.name.trim(),
+          filters: dto.filters,
+          isDefault: dto.isDefault ?? false,
+        },
+        update: { filters: dto.filters, isDefault: dto.isDefault ?? false },
+      });
+    });
+
+    await this.audit.record({
+      action: "CREATE",
+      tableName: "VehicleSavedFilter",
+      recordId: filter.id,
+      actorId: principal.userId,
+      companyId: principal.companyId,
+      newValue: { name: filter.name, filters: dto.filters, isDefault: filter.isDefault },
+      device,
+    });
+
+    return filter;
+  }
+
+  async deleteSavedFilter(principal: RequestPrincipal, filterId: string, device?: RequestDevice) {
+    const filter = await this.prisma.vehicleSavedFilter.findFirst({
+      where: {
+        id: filterId,
+        companyId: principal.companyId,
+        userId: principal.userId,
+        scope: "fleet.vehicles",
+      },
+    });
+
+    if (!filter) {
+      throw new NotFoundException("Saved filter not found");
+    }
+
+    await this.prisma.vehicleSavedFilter.delete({
+      where: { id: filter.id, companyId: principal.companyId, userId: principal.userId },
+    });
+    await this.audit.record({
+      action: "DELETE",
+      tableName: "VehicleSavedFilter",
+      recordId: filter.id,
+      actorId: principal.userId,
+      companyId: principal.companyId,
+      oldValue: { name: filter.name, filters: filter.filters, isDefault: filter.isDefault },
+      device,
+    });
+
+    return { deleted: true };
   }
 
   async getVehicle(principal: RequestPrincipal, id: string) {

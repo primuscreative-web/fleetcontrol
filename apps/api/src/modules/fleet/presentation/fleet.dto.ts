@@ -7,6 +7,7 @@ import {
   IsIn,
   IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Max,
@@ -270,6 +271,18 @@ export class ArchiveVehicleDto {
   @IsOptional()
   @IsString()
   reason?: string;
+}
+
+export class CreateVehicleSavedFilterDto {
+  @IsString()
+  name!: string;
+
+  @IsObject()
+  filters!: Record<string, string>;
+
+  @IsOptional()
+  @IsBoolean()
+  isDefault?: boolean;
 }
 
 export class CreateVehiclePhotoDto {

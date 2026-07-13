@@ -136,6 +136,13 @@ export interface VehicleListResponse {
   };
 }
 
+export interface VehicleSavedFilter {
+  id: string;
+  name: string;
+  filters: Record<string, string>;
+  isDefault: boolean;
+}
+
 export interface VehiclePayload {
   plate: string;
   categoryId?: string;
@@ -178,6 +185,27 @@ export function getFleetOptions() {
 export function listVehicles(searchParams: URLSearchParams) {
   const query = searchParams.toString();
   return apiRequest<VehicleListResponse>(`/fleet/vehicles${query ? `?${query}` : ""}`);
+}
+
+export function listVehicleSavedFilters() {
+  return apiRequest<VehicleSavedFilter[]>("/fleet/vehicles/saved-filters");
+}
+
+export function saveVehicleFilter(payload: {
+  name: string;
+  filters: Record<string, string>;
+  isDefault?: boolean;
+}) {
+  return apiRequest<VehicleSavedFilter>("/fleet/vehicles/saved-filters", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteVehicleSavedFilter(id: string) {
+  return apiRequest<{ deleted: boolean }>(`/fleet/vehicles/saved-filters/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export function getVehicle(id: string) {

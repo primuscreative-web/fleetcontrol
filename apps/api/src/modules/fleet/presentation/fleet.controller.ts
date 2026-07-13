@@ -1,5 +1,5 @@
 import { permissions } from "@fleetcontrol/authz";
-import { Body, Controller, Get, Param, Patch, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { CurrentUser } from "../../../common/decorators/current-user.decorator";
@@ -10,6 +10,7 @@ import {
   ArchiveVehicleDto,
   ChangeVehicleStatusDto,
   CreateFleetCatalogDto,
+  CreateVehicleSavedFilterDto,
   CreateVehicleDocumentDto,
   CreateVehicleDto,
   CreateVehiclePhotoDto,
@@ -40,6 +41,32 @@ export class FleetController {
   @RequirePermissions(permissions.fleet.read)
   getOptions(@CurrentUser() user: RequestPrincipal) {
     return this.fleetService.getOptions(user);
+  }
+
+  @Get("vehicles/saved-filters")
+  @RequirePermissions(permissions.fleet.read)
+  listSavedFilters(@CurrentUser() user: RequestPrincipal) {
+    return this.fleetService.listSavedFilters(user);
+  }
+
+  @Post("vehicles/saved-filters")
+  @RequirePermissions(permissions.fleet.read)
+  createSavedFilter(
+    @CurrentUser() user: RequestPrincipal,
+    @Body() body: CreateVehicleSavedFilterDto,
+    @Req() request: RequestWithContext,
+  ) {
+    return this.fleetService.createSavedFilter(user, body, request.device);
+  }
+
+  @Delete("vehicles/saved-filters/:filterId")
+  @RequirePermissions(permissions.fleet.read)
+  deleteSavedFilter(
+    @CurrentUser() user: RequestPrincipal,
+    @Param("filterId") filterId: string,
+    @Req() request: RequestWithContext,
+  ) {
+    return this.fleetService.deleteSavedFilter(user, filterId, request.device);
   }
 
   @Post("vehicles")
