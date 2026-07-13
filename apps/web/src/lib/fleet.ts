@@ -45,6 +45,12 @@ export interface VehicleRecord {
   renavam?: string | null;
   chassis?: string | null;
   color?: string | null;
+  engineNumber?: string | null;
+  power?: string | null;
+  capacity?: string | null;
+  grossWeight?: number | null;
+  netWeight?: number | null;
+  axleCount?: number | null;
   modelYear?: number | null;
   manufactureYear?: number | null;
   status: string;
@@ -56,6 +62,14 @@ export interface VehicleRecord {
   contractId?: string | null;
   observations?: string | null;
   archivedAt?: string | null;
+  branchId?: string | null;
+  departmentId?: string | null;
+  costCenterId?: string | null;
+  categoryId?: string | null;
+  subcategoryId?: string | null;
+  makeId?: string | null;
+  modelId?: string | null;
+  versionId?: string | null;
   branch?: FleetNamedEntity | null;
   department?: FleetNamedEntity | null;
   costCenter?: FleetNamedEntity | null;

@@ -18,6 +18,7 @@ describe("FleetService", () => {
   const upsertSavedFilter = jest.fn();
   const updateSavedFilters = jest.fn();
   const deleteSavedFilter = jest.fn();
+  const countReference = jest.fn().mockResolvedValue(1);
   const transaction = jest.fn(async (operation: (client: unknown) => unknown) => operation(prisma));
   const prisma = {
     vehicleSavedFilter: {
@@ -27,6 +28,14 @@ describe("FleetService", () => {
       updateMany: updateSavedFilters,
       delete: deleteSavedFilter,
     },
+    branch: { count: countReference },
+    department: { count: countReference },
+    costCenter: { count: countReference },
+    vehicleCategory: { count: countReference },
+    vehicleSubcategory: { count: countReference },
+    vehicleMake: { count: countReference },
+    vehicleModel: { count: countReference },
+    vehicleVersion: { count: countReference },
     $transaction: transaction,
   } as unknown as PrismaService;
   const repository = {
@@ -92,6 +101,50 @@ describe("FleetService", () => {
     expect(result).toEqual(expect.objectContaining({ id: "vehicle-1", status: "INACTIVE" }));
   });
 
+  it("transfers a vehicle and records old and new organizational scope", async () => {
+    const current = vehicle({
+      branchId: "branch-1",
+      departmentId: "department-1",
+      costCenterId: "cost-center-1",
+    });
+    const transferred = vehicle({
+      branchId: "branch-2",
+      departmentId: "department-2",
+      costCenterId: "cost-center-2",
+    });
+    findVehicleById.mockResolvedValue(current);
+    updateVehicle.mockResolvedValue(transferred);
+
+    await service.transferVehicle(principal, "vehicle-1", {
+      branchId: "branch-2",
+      departmentId: "department-2",
+      costCenterId: "cost-center-2",
+      reason: "Realocacao operacional",
+    });
+
+    expect(updateVehicle).toHaveBeenCalledWith(
+      "company-1",
+      "vehicle-1",
+      expect.objectContaining({
+        branch: { connect: { id: "branch-2" } },
+        department: { connect: { id: "department-2" } },
+        costCenter: { connect: { id: "cost-center-2" } },
+      }),
+    );
+    expect(createTimelineEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "TRANSFERRED", title: "Veiculo transferido" }),
+    );
+    expect(recordAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        oldValue: expect.objectContaining({ branchId: "branch-1" }),
+        newValue: expect.objectContaining({ branchId: "branch-2" }),
+      }),
+    );
+    expect(publishEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "VehicleTransferred", aggregateId: "vehicle-1" }),
+    );
+  });
+
   it("does not reveal a vehicle outside the principal branch", async () => {
     findVehicleById.mockResolvedValue(vehicle({ branchId: "branch-2" }));
 
@@ -151,6 +204,16 @@ describe("FleetService", () => {
       },
     });
     expect(deleteSavedFilter).not.toHaveBeenCalled();
+  });
+
+  it("rejects a transfer to an organizational reference from another company", async () => {
+    findVehicleById.mockResolvedValue(vehicle());
+    countReference.mockResolvedValueOnce(0);
+
+    await expect(
+      service.transferVehicle(principal, "vehicle-1", { branchId: "foreign-branch" }),
+    ).rejects.toMatchObject({ status: 400 });
+    expect(updateVehicle).not.toHaveBeenCalled();
   });
 });
 

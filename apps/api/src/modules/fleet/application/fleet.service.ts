@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type { Prisma, VehicleDocumentType, VehicleTimelineType } from "@fleetcontrol/database";
 
 import type { RequestDevice, RequestPrincipal } from "../../../common/context/request-context";
@@ -270,6 +270,7 @@ export class FleetService {
   }
 
   async createVehicle(principal: RequestPrincipal, dto: CreateVehicleDto, device?: RequestDevice) {
+    await this.validateVehicleReferences(principal.companyId, dto);
     const vehicle = (await this.repository.createVehicle(
       this.buildVehicleCreateInput(principal.companyId, dto),
     )) as VehicleRecord;
@@ -299,6 +300,7 @@ export class FleetService {
     device?: RequestDevice,
   ) {
     const current = await this.requireVehicle(principal, id);
+    await this.validateVehicleReferences(principal.companyId, dto);
     const vehicle = (await this.repository.updateVehicle(
       principal.companyId,
       current.id,
@@ -380,6 +382,7 @@ export class FleetService {
     device?: RequestDevice,
   ) {
     const current = await this.requireVehicle(principal, id);
+    await this.validateVehicleReferences(principal.companyId, dto);
     const vehicle = (await this.repository.updateVehicle(
       principal.companyId,
       current.id,
@@ -738,6 +741,64 @@ export class FleetService {
     }
 
     return vehicle;
+  }
+
+  private async validateVehicleReferences(
+    companyId: string,
+    dto: Partial<CreateVehicleDto & TransferVehicleDto>,
+  ) {
+    await Promise.all([
+      this.ensureReference("branch", dto.branchId, () =>
+        this.prisma.branch.count({ where: { id: dto.branchId, companyId } }),
+      ),
+      this.ensureReference("department", dto.departmentId, () =>
+        this.prisma.department.count({
+          where: {
+            id: dto.departmentId,
+            companyId,
+            ...(dto.branchId
+              ? { OR: [{ branchId: dto.branchId }, { branchId: null }] }
+              : undefined),
+          },
+        }),
+      ),
+      this.ensureReference("cost center", dto.costCenterId, () =>
+        this.prisma.costCenter.count({
+          where: {
+            id: dto.costCenterId,
+            companyId,
+            ...(dto.branchId
+              ? { OR: [{ branchId: dto.branchId }, { branchId: null }] }
+              : undefined),
+          },
+        }),
+      ),
+      this.ensureReference("category", dto.categoryId, () =>
+        this.prisma.vehicleCategory.count({ where: { id: dto.categoryId, companyId } }),
+      ),
+      this.ensureReference("subcategory", dto.subcategoryId, () =>
+        this.prisma.vehicleSubcategory.count({ where: { id: dto.subcategoryId, companyId } }),
+      ),
+      this.ensureReference("make", dto.makeId, () =>
+        this.prisma.vehicleMake.count({ where: { id: dto.makeId, companyId } }),
+      ),
+      this.ensureReference("model", dto.modelId, () =>
+        this.prisma.vehicleModel.count({ where: { id: dto.modelId, companyId } }),
+      ),
+      this.ensureReference("version", dto.versionId, () =>
+        this.prisma.vehicleVersion.count({ where: { id: dto.versionId, companyId } }),
+      ),
+    ]);
+  }
+
+  private async ensureReference(
+    label: string,
+    id: string | undefined,
+    count: () => Promise<number>,
+  ) {
+    if (id && (await count()) === 0) {
+      throw new BadRequestException(`Invalid ${label} for company scope`);
+    }
   }
 
   private buildVehicleCreateInput(

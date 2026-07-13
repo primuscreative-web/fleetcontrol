@@ -4,12 +4,16 @@ The Fleet module owns the vehicle master record and its operational lifecycle. E
 write is scoped by `companyId`; branch and department restrictions are additionally applied from
 the authenticated principal.
 
+Vehicle writes validate every referenced catalog and organizational record against the same
+company. Transfers also enforce branch compatibility for departments and cost centers.
+
 ## Capabilities
 
-- Vehicle registration, update, status changes, organizational transfers, and soft archival.
+- Vehicle registration, editable profiles, status changes, organizational transfers, and soft
+  archival.
 - Catalogs for categories, subcategories, makes, models, versions, and cost centers.
 - Search and filters by status, branch, department, category, make, model, plate, RENAVAM, and
-  chassis.
+  chassis, with server-side pagination.
 - User-owned saved filter views, including a single default view per user and company.
 - Vehicle photos, documents with expiry notifications, timeline, cost aggregates, audit trail,
   outbox events, and prepared cross-module relationships.

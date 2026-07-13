@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { DataGrid } from "@/components/data/data-grid";
+import { Pagination } from "@/components/data/pagination";
 import { StatusBadge } from "@/components/data/status-badge";
 import { LoadingState } from "@/components/feedback/loading-state";
 import { AccessGuard } from "@/components/platform/access-guard";
@@ -51,6 +52,7 @@ export function VehicleList() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
   const [isDefault, setIsDefault] = useState(false);
+  const [page, setPage] = useState(1);
   const options = useQuery({ queryKey: ["fleet-options"], queryFn: getFleetOptions, retry: false });
   const savedFilters = useQuery({
     queryKey: ["vehicle-saved-filters"],
@@ -69,6 +71,7 @@ export function VehicleList() {
     setCategoryId(filter.filters.categoryId ?? "all");
     setSelectedFilterId(filter.id);
   }, [savedFilters.data]);
+  useEffect(() => setPage(1), [branchId, categoryId, departmentId, search, status]);
   const params = useMemo(() => {
     const searchParams = new URLSearchParams();
     if (search) {
@@ -87,8 +90,9 @@ export function VehicleList() {
       searchParams.set("categoryId", categoryId);
     }
     searchParams.set("pageSize", "25");
+    searchParams.set("page", String(page));
     return searchParams;
-  }, [branchId, categoryId, departmentId, search, status]);
+  }, [branchId, categoryId, departmentId, page, search, status]);
   const vehicles = useQuery({
     queryKey: ["vehicles", params.toString()],
     queryFn: () => listVehicles(params),
@@ -136,6 +140,7 @@ export function VehicleList() {
     setDepartmentId(filter.filters.departmentId ?? "all");
     setCategoryId(filter.filters.categoryId ?? "all");
     setSelectedFilterId(filter.id);
+    setPage(1);
   }
 
   function clearFilters() {
@@ -145,6 +150,7 @@ export function VehicleList() {
     setDepartmentId("all");
     setCategoryId("all");
     setSelectedFilterId("none");
+    setPage(1);
   }
 
   const columns = useMemo<Array<ColumnDef<VehicleRecord>>>(
@@ -320,6 +326,13 @@ export function VehicleList() {
 
             {vehicles.isLoading ? <LoadingState /> : null}
             {vehicles.data ? <DataGrid columns={columns} data={vehicles.data.data} /> : null}
+            {vehicles.data && vehicles.data.pagination.pageCount > 1 ? (
+              <Pagination
+                page={vehicles.data.pagination.page}
+                totalPages={vehicles.data.pagination.pageCount}
+                onPageChange={setPage}
+              />
+            ) : null}
             {vehicles.data?.data.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 Nenhum veiculo encontrado para os filtros atuais.

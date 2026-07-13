@@ -2,7 +2,16 @@
 
 import { permissions } from "@fleetcontrol/authz";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, FileText, ImagePlus, Route, ShieldCheck } from "lucide-react";
+import {
+  Archive,
+  ArrowRightLeft,
+  FileText,
+  ImagePlus,
+  Pencil,
+  Route,
+  ShieldCheck,
+} from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -41,6 +50,7 @@ import {
   getVehicleCosts,
   getVehicleEvents,
   getVehicleRelationships,
+  transferVehicle,
   type VehicleRecord,
 } from "@/lib/fleet";
 import { useSession } from "@/providers/session-provider";
@@ -52,6 +62,11 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
   const { profile } = useSession();
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiveReason, setArchiveReason] = useState("");
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferBranchId, setTransferBranchId] = useState("");
+  const [transferDepartmentId, setTransferDepartmentId] = useState("");
+  const [transferCostCenterId, setTransferCostCenterId] = useState("");
+  const [transferReason, setTransferReason] = useState("");
   const vehicle = useQuery({
     queryKey: ["vehicle", vehicleId],
     queryFn: () => getVehicle(vehicleId),
@@ -75,6 +90,30 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
     },
     onError: () => toast.error("Nao foi possivel arquivar o veiculo"),
   });
+  const transferMutation = useMutation({
+    mutationFn: () =>
+      transferVehicle(vehicleId, {
+        branchId: transferBranchId || undefined,
+        departmentId: transferDepartmentId || undefined,
+        costCenterId: transferCostCenterId || undefined,
+        reason: transferReason.trim() || undefined,
+      }),
+    onSuccess: () => {
+      toast.success("Veiculo transferido");
+      setTransferOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["vehicle", vehicleId] });
+      void queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+    },
+    onError: () => toast.error("Nao foi possivel transferir o veiculo"),
+  });
+
+  function openTransfer() {
+    setTransferBranchId(vehicle.data?.branchId ?? vehicle.data?.branch?.id ?? "");
+    setTransferDepartmentId(vehicle.data?.departmentId ?? vehicle.data?.department?.id ?? "");
+    setTransferCostCenterId(vehicle.data?.costCenterId ?? vehicle.data?.costCenter?.id ?? "");
+    setTransferReason("");
+    setTransferOpen(true);
+  }
 
   return (
     <AccessGuard permission={permissions.fleet.read}>
@@ -121,6 +160,25 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
                       ))}
                     </SelectContent>
                   </Select>
+                  {canAccess(profile, permissions.fleet.manage) && !vehicle.data.archivedAt ? (
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href={`/dashboard/frota/${vehicleId}/editar`}>
+                        <Pencil className="mr-2 size-4" />
+                        Editar cadastro
+                      </Link>
+                    </Button>
+                  ) : null}
+                  {canAccess(profile, permissions.fleet.transfer) && !vehicle.data.archivedAt ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={openTransfer}
+                    >
+                      <ArrowRightLeft className="mr-2 size-4" />
+                      Transferir veiculo
+                    </Button>
+                  ) : null}
                   {canAccess(profile, permissions.fleet.archive) && !vehicle.data.archivedAt ? (
                     <Button
                       type="button"
@@ -169,6 +227,97 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
                           disabled={archiveMutation.isPending}
                         >
                           {archiveMutation.isPending ? "Arquivando..." : "Confirmar arquivamento"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Transferir {vehicle.data.plate}</DialogTitle>
+                        <DialogDescription>
+                          Atualize os vinculos organizacionais. A transferencia sera registrada na
+                          timeline, auditoria e eventos do veiculo.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="space-y-2 text-sm font-medium">
+                          Filial
+                          <Select value={transferBranchId} onValueChange={setTransferBranchId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar filial" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.data?.branches.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </label>
+                        <label className="space-y-2 text-sm font-medium">
+                          Departamento
+                          <Select
+                            value={transferDepartmentId}
+                            onValueChange={setTransferDepartmentId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar departamento" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.data?.departments.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </label>
+                        <label className="space-y-2 text-sm font-medium">
+                          Centro de custo
+                          <Select
+                            value={transferCostCenterId}
+                            onValueChange={setTransferCostCenterId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar centro de custo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {options.data?.costCenters.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </label>
+                        <label className="space-y-2 text-sm font-medium">
+                          Motivo
+                          <Input
+                            value={transferReason}
+                            onChange={(event) => setTransferReason(event.target.value)}
+                            placeholder="Motivo da transferencia"
+                          />
+                        </label>
+                      </div>
+                      <div className="mt-6 flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={transferMutation.isPending}
+                          onClick={() => setTransferOpen(false)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={transferMutation.isPending}
+                          onClick={() => transferMutation.mutate()}
+                        >
+                          {transferMutation.isPending
+                            ? "Transferindo..."
+                            : "Confirmar transferencia"}
                         </Button>
                       </div>
                     </DialogContent>
