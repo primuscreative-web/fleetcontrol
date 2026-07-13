@@ -75,7 +75,7 @@ export class PrismaFleetRepository implements FleetRepository {
 
   updateVehicle(companyId: string, id: string, data: Prisma.VehicleUpdateInput) {
     return this.prisma.vehicle.update({
-      where: { id },
+      where: { id, companyId },
       data,
       include: vehicleInclude,
     });
