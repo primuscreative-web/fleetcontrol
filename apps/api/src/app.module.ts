@@ -22,6 +22,7 @@ import { DriversModule } from "./modules/drivers/drivers.module";
 import { ContractsModule } from "./modules/contracts/contracts.module";
 import { FeatureFlagsModule } from "./modules/feature-flags/feature-flags.module";
 import { FleetModule } from "./modules/fleet/fleet.module";
+import { FuelModule } from "./modules/fuel/fuel.module";
 import { HealthModule } from "./modules/health/health.module";
 import { MailModule } from "./modules/mail/mail.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
@@ -62,6 +63,7 @@ import { PrismaModule } from "./shared/infrastructure/prisma.module";
     FleetModule,
     DriversModule,
     ContractsModule,
+    FuelModule,
     MailModule,
     NotificationsModule,
     HealthModule,

@@ -102,6 +102,8 @@ Implemented in this phase:
   dashboards, and tenant-safe operational workflows.
 - Contract and public-bid lifecycle, addenda, expiry alerts, financial utilization, documents, and
   historical vehicle allocation.
+- Fuel station and price history, controlled fueling approval, anomaly detection, consumption,
+  cost aggregation, audit events, and operational dashboard.
 - SMTP mail provider for password reset and email notifications.
 - Theme provider and light/dark mode.
 - Core reusable UI components.
@@ -115,6 +117,5 @@ Still deferred:
 - Tires.
 - Workshops.
 - Auto parts.
-- Fueling.
 - Checklists.
 - Reports.

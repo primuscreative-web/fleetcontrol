@@ -55,6 +55,11 @@ const permissions = [
   ["contracts", "allocate"],
   ["contracts", "documents"],
   ["contracts", "archive"],
+  ["fuel", "read"],
+  ["fuel", "manage"],
+  ["fuel", "approve"],
+  ["fuel", "stations"],
+  ["fuel", "import"],
 ] as const;
 
 const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
@@ -94,6 +99,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:allocate",
     "contracts:documents",
     "contracts:archive",
+    "fuel:read",
+    "fuel:manage",
+    "fuel:approve",
+    "fuel:stations",
+    "fuel:import",
   ],
   director: [
     "company:read",
@@ -107,6 +117,7 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "fleet:costs",
     "drivers:read",
     "contracts:read",
+    "fuel:read",
   ],
   manager: [
     "company:read",
@@ -130,6 +141,11 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:amend",
     "contracts:allocate",
     "contracts:documents",
+    "fuel:read",
+    "fuel:manage",
+    "fuel:approve",
+    "fuel:stations",
+    "fuel:import",
   ],
   supervisor: [
     "company:read",
@@ -149,8 +165,20 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:manage",
     "contracts:allocate",
     "contracts:documents",
+    "fuel:read",
+    "fuel:manage",
+    "fuel:approve",
+    "fuel:stations",
   ],
-  finance: ["company:read", "notifications:read", "fleet:read", "fleet:costs", "contracts:read"],
+  finance: [
+    "company:read",
+    "notifications:read",
+    "fleet:read",
+    "fleet:costs",
+    "contracts:read",
+    "fuel:read",
+    "fuel:approve",
+  ],
   purchasing: [
     "company:read",
     "notifications:read",
@@ -161,6 +189,8 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:manage",
     "contracts:amend",
     "contracts:documents",
+    "fuel:read",
+    "fuel:stations",
   ],
   operator: [
     "company:read",
@@ -175,6 +205,8 @@ const rolePermissions: Record<keyof typeof systemRoles, string[]> = {
     "contracts:read",
     "contracts:allocate",
     "contracts:documents",
+    "fuel:read",
+    "fuel:manage",
   ],
   driver: ["company:read", "notifications:read", "fleet:read"],
   viewer: ["company:read", "notifications:read", "fleet:read"],

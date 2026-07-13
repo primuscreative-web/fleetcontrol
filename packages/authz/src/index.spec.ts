@@ -32,4 +32,12 @@ describe("authz", () => {
     expect(hasPermission("operator", permissions.contracts.archive)).toBe(false);
     expect(hasPermission("viewer", permissions.contracts.read)).toBe(false);
   });
+
+  it("separates fueling registration, approval and station administration", () => {
+    expect(hasPermission("operator", permissions.fuel.manage)).toBe(true);
+    expect(hasPermission("operator", permissions.fuel.approve)).toBe(false);
+    expect(hasPermission("manager", permissions.fuel.approve)).toBe(true);
+    expect(hasPermission("purchasing", permissions.fuel.stations)).toBe(true);
+    expect(hasPermission("viewer", permissions.fuel.manage)).toBe(false);
+  });
 });
