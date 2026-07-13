@@ -55,6 +55,7 @@ export interface VehicleRecord {
   operationalCategory?: string | null;
   contractId?: string | null;
   observations?: string | null;
+  archivedAt?: string | null;
   branch?: FleetNamedEntity | null;
   department?: FleetNamedEntity | null;
   costCenter?: FleetNamedEntity | null;
@@ -211,6 +212,13 @@ export function transferVehicle(
   return apiRequest<VehicleRecord>(`/fleet/vehicles/${id}/transfer`, {
     method: "POST",
     body: JSON.stringify(cleanPayload(payload)),
+  });
+}
+
+export function archiveVehicle(id: string, reason?: string) {
+  return apiRequest<VehicleRecord>(`/fleet/vehicles/${id}/archive`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
   });
 }
 

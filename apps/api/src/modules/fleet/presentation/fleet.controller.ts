@@ -7,6 +7,7 @@ import { RequirePermissions } from "../../../common/decorators/permissions.decor
 import type { RequestPrincipal, RequestWithContext } from "../../../common/context/request-context";
 import { FleetService } from "../application/fleet.service";
 import {
+  ArchiveVehicleDto,
   ChangeVehicleStatusDto,
   CreateFleetCatalogDto,
   CreateVehicleDocumentDto,
@@ -88,6 +89,17 @@ export class FleetController {
     @Req() request: RequestWithContext,
   ) {
     return this.fleetService.transferVehicle(user, id, body, request.device);
+  }
+
+  @Post("vehicles/:id/archive")
+  @RequirePermissions(permissions.fleet.archive)
+  archiveVehicle(
+    @CurrentUser() user: RequestPrincipal,
+    @Param("id") id: string,
+    @Body() body: ArchiveVehicleDto,
+    @Req() request: RequestWithContext,
+  ) {
+    return this.fleetService.archiveVehicle(user, id, body, request.device);
   }
 
   @Post("vehicles/:id/photos")

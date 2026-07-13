@@ -266,6 +266,12 @@ export class TransferVehicleDto {
   reason?: string;
 }
 
+export class ArchiveVehicleDto {
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+
 export class CreateVehiclePhotoDto {
   @IsString()
   storageKey!: string;

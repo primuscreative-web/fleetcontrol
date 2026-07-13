@@ -2,7 +2,8 @@
 
 import { permissions } from "@fleetcontrol/authz";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, ImagePlus, Route, ShieldCheck } from "lucide-react";
+import { Archive, FileText, ImagePlus, Route, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Timeline } from "@/components/data/timeline";
@@ -12,6 +13,13 @@ import { Breadcrumb } from "@/components/navigation/breadcrumb";
 import { AccessGuard } from "@/components/platform/access-guard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,9 +29,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { canAccess } from "@/lib/auth";
 import {
   addVehicleDocument,
   addVehiclePhoto,
+  archiveVehicle,
   changeVehicleStatus,
   getFleetOptions,
   getVehicle,
@@ -33,10 +43,15 @@ import {
   getVehicleRelationships,
   type VehicleRecord,
 } from "@/lib/fleet";
+import { useSession } from "@/providers/session-provider";
 import { useState } from "react";
 
 export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { profile } = useSession();
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveReason, setArchiveReason] = useState("");
   const vehicle = useQuery({
     queryKey: ["vehicle", vehicleId],
     queryFn: () => getVehicle(vehicleId),
@@ -49,6 +64,16 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
       toast.success("Status atualizado");
       void queryClient.invalidateQueries({ queryKey: ["vehicle", vehicleId] });
     },
+  });
+  const archiveMutation = useMutation({
+    mutationFn: () => archiveVehicle(vehicleId, archiveReason.trim() || undefined),
+    onSuccess: () => {
+      toast.success("Veiculo arquivado");
+      setArchiveOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["vehicles"] });
+      router.push("/dashboard/frota");
+    },
+    onError: () => toast.error("Nao foi possivel arquivar o veiculo"),
   });
 
   return (
@@ -96,6 +121,58 @@ export function VehicleProfile({ vehicleId }: { vehicleId: string }) {
                       ))}
                     </SelectContent>
                   </Select>
+                  {canAccess(profile, permissions.fleet.archive) && !vehicle.data.archivedAt ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      disabled={archiveMutation.isPending}
+                      onClick={() => setArchiveOpen(true)}
+                    >
+                      <Archive className="mr-2 size-4" />
+                      {archiveMutation.isPending ? "Arquivando..." : "Arquivar veiculo"}
+                    </Button>
+                  ) : null}
+                  <Dialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Arquivar {vehicle.data.plate}?</DialogTitle>
+                        <DialogDescription>
+                          O veiculo sera removido da frota ativa. A operacao ficara registrada na
+                          auditoria e no historico operacional.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-2">
+                        <label htmlFor="archive-reason" className="text-sm font-medium">
+                          Motivo do arquivamento
+                        </label>
+                        <Input
+                          id="archive-reason"
+                          value={archiveReason}
+                          onChange={(event) => setArchiveReason(event.target.value)}
+                          placeholder="Ex.: fim de contrato ou baixa patrimonial"
+                          autoComplete="off"
+                        />
+                      </div>
+                      <div className="mt-6 flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setArchiveOpen(false)}
+                          disabled={archiveMutation.isPending}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => archiveMutation.mutate()}
+                          disabled={archiveMutation.isPending}
+                        >
+                          {archiveMutation.isPending ? "Arquivando..." : "Confirmar arquivamento"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
 

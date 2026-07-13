@@ -16,6 +16,7 @@ import {
 import type { FleetRepository } from "./fleet.repository";
 import { FLEET_REPOSITORY } from "./fleet.repository";
 import type {
+  ArchiveVehicleDto,
   ChangeVehicleStatusDto,
   CreateFleetCatalogDto,
   CreateVehicleDocumentDto,
@@ -329,6 +330,52 @@ export class FleetService {
     await this.publishVehicleEvent(fleetEvents.transferred, vehicle, {
       branchId: vehicle.branchId,
       departmentId: vehicle.departmentId,
+    });
+
+    return this.toVehicleDetail(vehicle);
+  }
+
+  async archiveVehicle(
+    principal: RequestPrincipal,
+    id: string,
+    dto: ArchiveVehicleDto,
+    device?: RequestDevice,
+  ) {
+    const current = await this.requireVehicle(principal, id);
+    const archivedAt = new Date();
+    const vehicle = (await this.repository.updateVehicle(principal.companyId, current.id, {
+      archivedAt,
+      status: "INACTIVE",
+    })) as VehicleRecord;
+
+    await this.recordTimeline(vehicle.id, principal.companyId, "ARCHIVED", "Veiculo arquivado", {
+      actorId: principal.userId,
+      description: dto.reason,
+      metadata: { reason: dto.reason, previousStatus: current.status, archivedAt },
+    });
+    await this.audit.record({
+      action: "UPDATE",
+      tableName: "Vehicle",
+      recordId: vehicle.id,
+      actorId: principal.userId,
+      companyId: principal.companyId,
+      oldValue: { archivedAt: current.archivedAt, status: current.status },
+      newValue: { archivedAt, status: vehicle.status, reason: dto.reason },
+      device,
+    });
+    await this.publishVehicleEvent(fleetEvents.archived, vehicle, {
+      reason: dto.reason,
+      previousStatus: current.status,
+      archivedAt,
+    });
+    await this.notifications.create({
+      companyId: principal.companyId,
+      userId: principal.userId,
+      channel: "INTERNAL",
+      category: "fleet.lifecycle",
+      title: "Veiculo arquivado",
+      body: `${vehicle.plate} foi removido da frota ativa.`,
+      metadata: { vehicleId: vehicle.id, reason: dto.reason },
     });
 
     return this.toVehicleDetail(vehicle);
