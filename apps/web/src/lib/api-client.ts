@@ -17,11 +17,13 @@ async function requestWithRefresh<T>(
   canRefresh: boolean,
 ): Promise<T> {
   const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
+  const accessToken = typeof window !== "undefined" ? window.localStorage.getItem("fc_access_token") : null;
   const response = await fetch(path.startsWith("http") ? path : `${apiBase}${path.startsWith("/api") ? path : `/api${path}`}`, {
     ...init,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...init?.headers,
     },
   });
@@ -46,7 +48,9 @@ async function requestWithRefresh<T>(
     return undefined as T;
   }
 
-  return (await response.json()) as T;
+  const result = (await response.json()) as T & { accessToken?: string };
+  if (result.accessToken && typeof window !== "undefined") window.localStorage.setItem("fc_access_token", result.accessToken);
+  return result as T;
 }
 
 async function resolveErrorMessage(response: Response): Promise<string> {

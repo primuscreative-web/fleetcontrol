@@ -24,7 +24,7 @@ export default async function handler(req: any, res: any) {
     const session = await response.json();
     if (!response.ok) return res.status(401).json({ message: session.error_description ?? "Credenciais inválidas" });
     res.setHeader("set-cookie", `fc_access_token=${session.access_token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${session.expires_in ?? 3600}`);
-    return res.status(200).json({ authenticated: true });
+    return res.status(200).json({ authenticated: true, accessToken: session.access_token });
   }
   if (path === "/api/auth/logout") {
     res.setHeader("set-cookie", "fc_access_token=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0");
@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
   }
   if (path === "/api/auth/me") {
     if (!supabaseUrl || !supabaseKey) return res.status(503).json({ message: "Supabase não configurado" });
-    const token = (req.headers?.cookie ?? "").match(/(?:^|; )fc_access_token=([^;]+)/)?.[1];
+    const token = (req.headers?.authorization?.match(/^Bearer\s+(.+)$/i)?.[1]) ?? (req.headers?.cookie ?? "").match(/(?:^|; )fc_access_token=([^;]+)/)?.[1];
     if (!token) return res.status(401).json({ message: "Não autenticado" });
     const response = await fetch(`${supabaseUrl}/auth/v1/user`, { headers: { apikey: supabaseKey, Authorization: `Bearer ${token}` } });
     const user = await response.json();
