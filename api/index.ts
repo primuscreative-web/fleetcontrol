@@ -25,7 +25,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader("content-type", "application/json");
-      res.end(JSON.stringify({ error: "API bootstrap failed", detail: error instanceof Error ? error.message : String(error) }));
+      res.end(JSON.stringify({ error: "API bootstrap failed", detail: error instanceof Error ? error.stack : String(error) }));
     }
   }
 }
