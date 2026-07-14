@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "npm run db:generate && npm run build --workspace @fleetcontrol/authz && npm run build --workspace @fleetcontrol/config && npm run build --workspace @fleetcontrol/database && npx tsc -p apps/api/tsconfig.json",
+  "buildCommand": "echo supabase-runtime",
   "outputDirectory": ".",
   "functions": {
     "api/index.ts": {

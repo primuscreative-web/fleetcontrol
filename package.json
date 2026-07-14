@@ -5,12 +5,11 @@
   "description": "Enterprise SaaS platform for fleet management.",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/web"
   ],
   "scripts": {
     "dev": "npm run dev --workspace @fleetcontrol/web",
     "dev:web": "npm run dev --workspace @fleetcontrol/web",
-    "dev:api": "npm run start:dev --workspace @fleetcontrol/api",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
