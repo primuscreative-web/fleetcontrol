@@ -20,16 +20,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (
-    !request.cookies.get("fleetcontrol_access_token") &&
-    !request.cookies.get("fleetcontrol_refresh_token")
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
+  // A sessão Supabase é validada no SessionProvider através do bearer token.
+  // O middleware não inspeciona localStorage nem cookies do domínio da API.
   return NextResponse.next();
 }
 
