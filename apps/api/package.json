@@ -4,7 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "prisma generate --schema ../../packages/database/prisma/schema.prisma && nest build && node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('dist/apps/api/src/main.js','dist/main.js')\"",
+    "build": "prisma generate --schema ../../packages/database/prisma/schema.prisma && nest build --webpack && node -e \"const fs=require('fs');fs.mkdirSync('dist',{recursive:true});fs.copyFileSync('dist/apps/api/src/main.js','dist/main.js')\"",
     "start": "node dist/apps/api/src/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint src",
