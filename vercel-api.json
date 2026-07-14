@@ -4,7 +4,7 @@
   "buildCommand": "npm run db:generate && npm run build --workspace @fleetcontrol/api",
   "functions": {
     "api/index.ts": {
-      "includeFiles": ["apps/api/dist/**", "packages/**"]
+      "includeFiles": "apps/**"
     }
   },
   "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }]
