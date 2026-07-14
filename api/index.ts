@@ -1,4 +1,12 @@
 export default async function handler(req: any, res: any) {
+  const origin = req.headers?.origin;
+  if (origin === "https://fleetcontrol-nine.vercel.app" || origin === "http://localhost:3000") {
+    res.setHeader("access-control-allow-origin", origin);
+    res.setHeader("access-control-allow-credentials", "true");
+  }
+  res.setHeader("access-control-allow-headers", "content-type, authorization");
+  res.setHeader("access-control-allow-methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS");
+  if (req.method === "OPTIONS") return res.status(204).end();
   const path = req.url?.split("?")[0] ?? "/";
   if (path === "/api/health" || path === "/health") {
     return res.status(200).json({ status: "ok", provider: "supabase", timestamp: new Date().toISOString() });
