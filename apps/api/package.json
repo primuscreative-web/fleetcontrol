@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "prisma generate --schema ../../packages/database/prisma/schema.prisma && nest build",
-    "start": "node dist/main.js",
+    "start": "node dist/apps/api/src/main.js",
     "start:dev": "nest start --watch",
     "lint": "eslint src",
     "typecheck": "tsc --project tsconfig.json --noEmit",
