@@ -1,5 +1,4 @@
 import type { Role } from "@fleetcontrol/authz";
-import type { Request } from "express";
 
 export interface RequestPrincipal {
   userId: string;
@@ -18,7 +17,15 @@ export interface RequestDevice {
   device?: string;
 }
 
-export interface RequestWithContext extends Request {
+export interface RequestWithContext {
+  method: string;
+  url: string;
+  ip?: string;
+  headers: Record<string, string | string[] | undefined>;
+  cookies?: Record<string, string | undefined>;
+  params: Record<string, string | undefined>;
+  query: Record<string, string | undefined>;
+  body?: Record<string, any>;
   user?: RequestPrincipal;
   device?: RequestDevice;
 }
