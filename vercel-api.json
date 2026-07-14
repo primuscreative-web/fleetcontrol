@@ -1,8 +1,8 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "npm run db:generate && npm run build --workspace @fleetcontrol/api",
-  "outputDirectory": "apps/api/dist",
+  "buildCommand": "npm run db:generate",
+  "outputDirectory": ".",
   "functions": {
     "api/index.ts": {
       "includeFiles": "apps/**"
