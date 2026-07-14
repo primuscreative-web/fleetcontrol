@@ -20,7 +20,7 @@ NEXT_PUBLIC_APP_URL=https://seu-dominio.vercel.app
 API_URL=https://sua-api-publica.com
 ```
 
-`API_URL` deve apontar para uma API NestJS FleetControl pública e acessível. O frontend usa rewrites para encaminhar `/api/*` para `${API_URL}/api/*`, mantendo cookies HTTP-only no fluxo de autenticação.
+`API_URL` deve apontar para a implantação Vercel da API NestJS FleetControl (com banco, Auth e Storage no Supabase). O frontend usa rewrites para encaminhar `/api/*` para `${API_URL}/api/*`, mantendo cookies HTTP-only no fluxo de autenticação. Nenhuma variável ou URL do Railway é necessária.
 
 ## Variáveis da API
 
