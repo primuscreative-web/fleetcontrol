@@ -16,7 +16,8 @@ async function requestWithRefresh<T>(
   init: RequestInit | undefined,
   canRefresh: boolean,
 ): Promise<T> {
-  const response = await fetch(path.startsWith("/api") ? path : `/api${path}`, {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
+  const response = await fetch(path.startsWith("http") ? path : `${apiBase}${path.startsWith("/api") ? path : `/api${path}`}`, {
     ...init,
     credentials: "include",
     headers: {
@@ -26,7 +27,7 @@ async function requestWithRefresh<T>(
   });
 
   if (response.status === 401 && canRefresh) {
-    const refreshed = await fetch("/api/auth/refresh", {
+    const refreshed = await fetch(`${apiBase}/api/auth/refresh`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
